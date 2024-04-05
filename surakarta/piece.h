@@ -1,7 +1,3 @@
-//
-// Created by CoderBak on 2024/4/5.
-//
-
 #ifndef PIECE_H
 #define PIECE_H
 

@@ -1,7 +1,3 @@
-//
-// Created by CoderBak on 2024/4/5.
-//
-
 #ifndef GAME_H
 #define GAME_H
 
@@ -38,7 +34,7 @@ public:
 
 class Game {
 public:
-    Game(unsigned board_size = BOARD_SIZE, unsigned int max_no_capture_round = 40) :
+    explicit Game(unsigned board_size = BOARD_SIZE, unsigned int max_no_capture_round = 40) :
             board_size_(board_size), board_(std::make_shared<Board>(board_size)),
             game_info_(std::make_shared<GameInfo>(max_no_capture_round)),
             rule_manager_(std::make_shared<RuleManager>(board_, game_info_)),
@@ -69,28 +65,12 @@ public:
      */
     MoveResponse Move(const Move &move);
 
-    /**
-     * @brief Set the agent.
-     */
-    void SetAgent(std::shared_ptr<AgentBase> agent) { agent_ = agent; }
-
-    unsigned int GetBoardSize() const { return board_size_; }
-
     std::shared_ptr<Board> GetBoard() const { return board_; }
 
     std::shared_ptr<GameInfo> GetGameInfo() const { return game_info_; }
 
-    std::shared_ptr<AgentBase> GetAgent() const { return agent_; }
-
     bool IsEnd() const { return game_info_->IsEnd(); }
 
-    void SetRuleManager(std::shared_ptr<RuleManager> rule_manager) { // For testing.
-        rule_manager_ = rule_manager;
-    }
-
-    std::shared_ptr<RuleManager> GetRuleManager() const { return rule_manager_; } // For testing.
-
-    //    private:
     unsigned int board_size_;
     std::shared_ptr<Board> board_;
     std::shared_ptr<GameInfo> game_info_;

@@ -1,11 +1,7 @@
 #include "server.h"
-#include <chrono>
 #include <iostream>
-#include <thread>
-#include "surakarta/agent/agent_random.h"
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
-#include <QDebug>
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr) {

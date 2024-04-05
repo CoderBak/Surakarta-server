@@ -1,4 +1,3 @@
-
 #ifndef BASIC_H
 #define BASIC_H
 
@@ -12,8 +11,11 @@
 class Move {
 public:
     Move(const Position from, const Position to, const Player player) : from(from), to(to), player(player) {}
+
     friend bool operator==(const Move &lhs, const Move &rhs) = default;
+
     friend bool operator!=(const Move &lhs, const Move &rhs) = default;
+
     Position from, to;
     Player player;
 };
@@ -50,7 +52,6 @@ struct GameInfo {
         os << "max_no_capture_round: " << game_info.maxNoCaptureRound << std::endl;
         return os;
     }
-
 
     friend std::istream &operator>>(std::istream &is, GameInfo &game_info) {
         std::string str;

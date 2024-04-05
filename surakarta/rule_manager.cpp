@@ -78,6 +78,7 @@ void RuleManager::OnUpdateBoard() {
     // Every time the board and game_info is updated to the next round version, this function will be called.
     // You don't need to implement this function if you don't need it.
     // A more delicate way is to use Qt's signal and slot mechanism, but that's the advanced part.
+    std::cout << "BOARD_UPDATED!" << std::endl;
 }
 
 IllegalMoveReason RuleManager::JudgeMove(const Move &move) {
@@ -131,7 +132,7 @@ IllegalMoveReason RuleManager::JudgeMove(const Move &move) {
     return IllegalMoveReason::ILLIGAL_CAPTURE_MOVE;
 }
 
-std::pair<EndReason, Player> RuleManager::JudgeEnd(const IllegalMoveReason reason) {
+std::pair<EndReason, Player> RuleManager::JudgeEnd(const IllegalMoveReason& reason) {
     // Note that at this point, the board and game_info have not been updated yet.
     // Return the end reason and the winner in this function.
     const auto player = game_info_->currentPlayer;
@@ -171,11 +172,3 @@ std::pair<EndReason, Player> RuleManager::JudgeEnd(const IllegalMoveReason reaso
     }
     return std::make_pair(EndReason::NONE, Player::NONE);
 }
-
-std::unique_ptr<std::vector<Position>>
-RuleManager::GetAllLegalTarget(const Position postion [[maybe_unused]]) {
-    // We don't test this function, you don't need to implement this function if you don't need it.
-    return std::make_unique<std::vector<Position>>();
-}
-
-void RuleManager::HelloWorld() { std::cout << "Hello World!" << std::endl; }

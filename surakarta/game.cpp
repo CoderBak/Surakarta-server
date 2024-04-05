@@ -1,7 +1,3 @@
-//
-// Created by CoderBak on 2024/4/5.
-//
-
 #include "game.h"
 #include <fstream>
 #include <iostream>
@@ -36,8 +32,7 @@ void Game::SaveGame(std::string file_name) const {
     fout.close();
 }
 
-void Game::UpdateGameInfo(IllegalMoveReason move_reason, EndReason end_reason,
-                          Player winner) {
+void Game::UpdateGameInfo(IllegalMoveReason move_reason, EndReason end_reason, Player winner) {
     if (move_reason == IllegalMoveReason::LEGAL_CAPTURE_MOVE) {
         game_info_->lastCapturedRound = game_info_->numRound;
     }
@@ -53,9 +48,7 @@ void Game::UpdateGameInfo(IllegalMoveReason move_reason, EndReason end_reason,
 MoveResponse Game::Move(const class Move &move) {
     IllegalMoveReason move_reason = rule_manager_->JudgeMove(move);
     auto [end_reason, winner] = rule_manager_->JudgeEnd(move_reason);
-
     UpdateGameInfo(move_reason, end_reason, winner);
-
     if (move_reason == IllegalMoveReason::LEGAL_NON_CAPTURE_MOVE) {
         std::swap((*board_)[move.to.x][move.to.y], (*board_)[move.from.x][move.from.y]);
         (*board_)[move.to.x][move.to.y]->SetPosition(move.to);
@@ -68,7 +61,6 @@ MoveResponse Game::Move(const class Move &move) {
                 std::make_shared<Piece>(move.from.x, move.from.y, PieceColor::NONE);
         rule_manager_->OnUpdateBoard();
     }
-
     MoveResponse response(move_reason, end_reason, winner);
     return response;
 }

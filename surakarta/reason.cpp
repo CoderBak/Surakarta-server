@@ -132,9 +132,7 @@ std::ostream &operator<<(std::ostream &os, const EndReason &reason) {
 std::istream &operator>>(std::istream &is, EndReason &reason) {
     std::string str;
     is >> str;
-    if (str == "NONE") {
-        reason = EndReason::NONE;
-    } else if (str == "STALEMATE") {
+    if (str == "STALEMATE") {
         reason = EndReason::STALEMATE;
     } else if (str == "CHECKMATE") {
         reason = EndReason::CHECKMATE;

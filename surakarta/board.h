@@ -8,23 +8,14 @@
 #include <iostream>
 #include "piece.h"
 
-class Row : public std::vector<std::shared_ptr<Piece>> {
-public:
-    Row(unsigned int board_size) : std::vector<std::shared_ptr<Piece>>(board_size) {}
-};
-
-class Board : public std::vector<Row> {
+class Board : public std::vector<std::vector<std::shared_ptr<Piece>>> {
 public:
     unsigned int board_size_;
 
-    Board(unsigned int board_size) : board_size_(board_size) {
+    explicit Board(unsigned int board_size) : board_size_(board_size) {
         for (unsigned int i = 0; i < board_size_; i++) {
-            this->push_back(Row(board_size_));
+            this->emplace_back(board_size_);
         }
-    }
-
-    bool IsInside(const Position &position) const {
-        return position.x < board_size_ && position.y < board_size_;
     }
 
     friend inline std::ostream &operator<<(std::ostream &os, const Board &board) {
@@ -62,4 +53,4 @@ public:
 };
 
 
-#endif //_SERVER_BOARD_H
+#endif //BOARD_H
