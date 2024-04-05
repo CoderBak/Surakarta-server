@@ -17,16 +17,18 @@ protected:
 
 private slots:
 
-    void readData();
+    void readClient1();
 
-    void countdown();
+    void readClient2();
+
+    void processClient(QTcpSocket *client);
 
     void socketDisconnected();
 
 private:
     QTimer timer;
     int countdownValue;
-    QTcpSocket *currentSocket;
+    QTcpSocket *client1, *client2;
 };
 
 #endif // SERVER_H

@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Network)
@@ -16,6 +16,21 @@ set(PROJECT_SOURCES
         main.cpp
         server.cpp
         server.h
+        utils/global_random_generator.h
+        common.h
+        surakarta/basic.h
+        surakarta/board.h
+        surakarta/game.cpp
+        surakarta/game.h
+        surakarta/reason.cpp
+        surakarta/rule_manager.cpp
+        surakarta/rule_manager.h
+        surakarta/reason.h
+        surakarta/utils.h
+        surakarta/agent/agent_base.h
+        surakarta/piece.h
+        surakarta/agent/agent_random.cpp
+        surakarta/agent/agent_random.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
