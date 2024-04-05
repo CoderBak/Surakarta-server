@@ -23,6 +23,8 @@ private slots:
 
     void processClient(QTcpSocket *client);
 
+    void socketDisconnected1();
+    void socketDisconnected2();
     void socketDisconnected();
 
 private:

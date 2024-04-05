@@ -40,13 +40,13 @@ void Server::incomingConnection(qintptr socketDescriptor) {
     if (!client1) {
         client1 = new QTcpSocket(this);
         client1->setSocketDescriptor(socketDescriptor);
-        connect(client1, &QTcpSocket::disconnected, this, &Server::socketDisconnected);
+        connect(client1, &QTcpSocket::disconnected, this, &Server::socketDisconnected1);
         connect(client1, &QTcpSocket::readyRead, this, &Server::readClient1);
         qDebug() << "Client 1 connected.";
     } else {
         client2 = new QTcpSocket(this);
         client2->setSocketDescriptor(socketDescriptor);
-        connect(client1, &QTcpSocket::disconnected, this, &Server::socketDisconnected);
+        connect(client2, &QTcpSocket::disconnected, this, &Server::socketDisconnected2);
         connect(client2, &QTcpSocket::readyRead, this, &Server::readClient2);
         qDebug() << "Client 2 connected.";
     }
@@ -65,20 +65,29 @@ void Server::processClient(QTcpSocket *client) {
     qDebug() << "Received from client" << (client == client1 ? "1:" : "2:") << data;
 }
 
+void Server::socketDisconnected1() {
+    if (client1) {
+        qDebug() << "Game stopped because client 1 stopped";
+    }
+    socketDisconnected();
+}
+
+void Server::socketDisconnected2() {
+    if (client2) {
+        qDebug() << "Game stopped because client 2 stopped";
+    }
+    socketDisconnected();
+}
+
 void Server::socketDisconnected() {
-    qDebug() << "Game stopped because one client stopped";
-    if (client1 || client2) {
-        qDebug() << "Client disconnected.";
-        timer.stop();
-        if (client1) {
-            qDebug() << "Client 1 stopped.";
-            client1 -> deleteLater();
-            client1 = nullptr;
-        }
-        if (client2) {
-            qDebug() << "Client 2 stopped.";
-            client2 -> deleteLater();
-            client2 = nullptr;
-        }
+    if (client1) {
+        qDebug() << "Client 1 stopped.";
+        client1 -> deleteLater();
+        client1 = nullptr;
+    }
+    if (client2) {
+        qDebug() << "Client 2 stopped.";
+        client2 -> deleteLater();
+        client2 = nullptr;
     }
 }
