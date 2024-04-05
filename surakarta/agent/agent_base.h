@@ -15,9 +15,9 @@
 class AgentBase {
 public:
     AgentBase(const std::shared_ptr<Board> &board, const std::shared_ptr<GameInfo> &game_info,
-              const std::shared_ptr<RuleManager> &rule_manager) :
-            board_size_(board->board_size_), board_(std::const_pointer_cast<const Board>(board)),
-            game_info_(std::const_pointer_cast<const GameInfo>(game_info)), rule_manager_(rule_manager) {}
+              const std::shared_ptr<RuleManager> &ruleManager) :
+            boardSize(board->boardSize), board(std::const_pointer_cast<const Board>(board)),
+            gameInfo(std::const_pointer_cast<const GameInfo>(game_info)), ruleManager(ruleManager) {}
 
     virtual Move CalculateMove() {
         return Move{Position(0, 0), Position(0, 0), Player::NONE};
@@ -25,10 +25,10 @@ public:
 
 
 protected:
-    unsigned int board_size_;
-    std::shared_ptr<const Board> board_;
-    std::shared_ptr<const GameInfo> game_info_;
-    std::shared_ptr<RuleManager> rule_manager_;
+    unsigned int boardSize;
+    std::shared_ptr<const Board> board;
+    std::shared_ptr<const GameInfo> gameInfo;
+    std::shared_ptr<RuleManager> ruleManager;
 };
 
 #endif //AGENT_BASE_H

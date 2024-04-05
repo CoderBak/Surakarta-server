@@ -103,7 +103,6 @@ public:
         return os;
     }
 
-    //    private:
     Position position_;
     PieceColor color_;
 };

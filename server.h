@@ -11,15 +11,20 @@ Q_OBJECT
 
 public:
     explicit Server(QObject *parent = nullptr);
+
     void startGame();
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
 
 private slots:
+
     void socketDisconnected1();
+
     void socketDisconnected2();
+
     void socketDisconnected();
+
     void onBoardUpdated(const QString &boardInfo);
 
 private:

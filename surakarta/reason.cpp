@@ -1,62 +1,46 @@
 #include "reason.h"
 #include <iostream>
 
-bool IsLegalMoveReason(IllegalMoveReason reason) {
-    switch (reason) {
-        case IllegalMoveReason::LEGAL:
-        case IllegalMoveReason::LEGAL_CAPTURE_MOVE:
-        case IllegalMoveReason::LEGAL_NON_CAPTURE_MOVE:
-            return true;
-        default:
-            return false;
-    }
-}
-
 bool IsEndReason(EndReason reason) {
-    switch (reason) {
-        case EndReason::NONE:
-            return false;
-        default:
-            return true;
-    }
+    return reason != EndReason::NONE;
 }
 
-std::ostream &operator<<(std::ostream &os, const IllegalMoveReason &reason) {
+std::ostream &operator<<(std::ostream &os, const MoveReason &reason) {
     switch (reason) {
-        case IllegalMoveReason::LEGAL:
+        case MoveReason::LEGAL:
             os << "LEGAL";
             break;
-        case IllegalMoveReason::LEGAL_CAPTURE_MOVE:
+        case MoveReason::LEGAL_CAPTURE_MOVE:
             os << "LEGAL_CAPTURE_MOVE";
             break;
-        case IllegalMoveReason::LEGAL_NON_CAPTURE_MOVE:
+        case MoveReason::LEGAL_NON_CAPTURE_MOVE:
             os << "LEGAL_NON_CAPTURE_MOVE";
             break;
-        case IllegalMoveReason::ILLIGAL:
-            os << "ILLIGAL";
+        case MoveReason::ILLEGAL:
+            os << "ILLEGAL";
             break;
-        case IllegalMoveReason::NOT_PLAYER_TURN:
+        case MoveReason::NOT_PLAYER_TURN:
             os << "NOT_PLAYER_TURN";
             break;
-        case IllegalMoveReason::OUT_OF_BOARD:
+        case MoveReason::OUT_OF_BOARD:
             os << "OUT_OF_BOARD";
             break;
-        case IllegalMoveReason::NOT_PIECE:
+        case MoveReason::NOT_PIECE:
             os << "NOT_PIECE";
             break;
-        case IllegalMoveReason::NOT_PLAYER_PIECE:
+        case MoveReason::NOT_PLAYER_PIECE:
             os << "NOT_PLAYER_PIECE";
             break;
-        case IllegalMoveReason::ILLIGAL_CAPTURE_MOVE:
-            os << "ILLIGAL_CAPTURE_MOVE";
+        case MoveReason::ILLEGAL_CAPTURE_MOVE:
+            os << "ILLEGAL_CAPTURE_MOVE";
             break;
-        case IllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE:
-            os << "ILLIGAL_NON_CAPTURE_MOVE";
+        case MoveReason::ILLEGAL_NON_CAPTURE_MOVE:
+            os << "ILLEGAL_NON_CAPTURE_MOVE";
             break;
-        case IllegalMoveReason::GAME_ALREADY_END:
+        case MoveReason::GAME_ALREADY_END:
             os << "GAME_ALREADY_END";
             break;
-        case IllegalMoveReason::GAME_NOT_START:
+        case MoveReason::GAME_NOT_START:
             os << "GAME_NOT_START";
             break;
         default:
@@ -66,35 +50,35 @@ std::ostream &operator<<(std::ostream &os, const IllegalMoveReason &reason) {
     return os;
 }
 
-std::istream &operator>>(std::istream &is, IllegalMoveReason &reason) {
+std::istream &operator>>(std::istream &is, MoveReason &reason) {
     std::string str;
     is >> str;
     if (str == "LEGAL") {
-        reason = IllegalMoveReason::LEGAL;
+        reason = MoveReason::LEGAL;
     } else if (str == "LEGAL_CAPTURE_MOVE") {
-        reason = IllegalMoveReason::LEGAL_CAPTURE_MOVE;
+        reason = MoveReason::LEGAL_CAPTURE_MOVE;
     } else if (str == "LEGAL_NON_CAPTURE_MOVE") {
-        reason = IllegalMoveReason::LEGAL_NON_CAPTURE_MOVE;
-    } else if (str == "ILLIGAL") {
-        reason = IllegalMoveReason::ILLIGAL;
+        reason = MoveReason::LEGAL_NON_CAPTURE_MOVE;
+    } else if (str == "ILLEGAL") {
+        reason = MoveReason::ILLEGAL;
     } else if (str == "NOT_PLAYER_TURN") {
-        reason = IllegalMoveReason::NOT_PLAYER_TURN;
+        reason = MoveReason::NOT_PLAYER_TURN;
     } else if (str == "OUT_OF_BOARD") {
-        reason = IllegalMoveReason::OUT_OF_BOARD;
+        reason = MoveReason::OUT_OF_BOARD;
     } else if (str == "NOT_PIECE") {
-        reason = IllegalMoveReason::NOT_PIECE;
+        reason = MoveReason::NOT_PIECE;
     } else if (str == "NOT_PLAYER_PIECE") {
-        reason = IllegalMoveReason::NOT_PLAYER_PIECE;
-    } else if (str == "ILLIGAL_CAPTURE_MOVE") {
-        reason = IllegalMoveReason::ILLIGAL_CAPTURE_MOVE;
-    } else if (str == "ILLIGAL_NON_CAPTURE_MOVE") {
-        reason = IllegalMoveReason::ILLIGAL_NON_CAPTURE_MOVE;
+        reason = MoveReason::NOT_PLAYER_PIECE;
+    } else if (str == "ILLEGAL_CAPTURE_MOVE") {
+        reason = MoveReason::ILLEGAL_CAPTURE_MOVE;
+    } else if (str == "ILLEGAL_NON_CAPTURE_MOVE") {
+        reason = MoveReason::ILLEGAL_NON_CAPTURE_MOVE;
     } else if (str == "GAME_ALREADY_END") {
-        reason = IllegalMoveReason::GAME_ALREADY_END;
+        reason = MoveReason::GAME_ALREADY_END;
     } else if (str == "GAME_NOT_START") {
-        reason = IllegalMoveReason::GAME_NOT_START;
+        reason = MoveReason::GAME_NOT_START;
     } else {
-        reason = IllegalMoveReason::ILLIGAL;
+        reason = MoveReason::ILLEGAL;
     }
     return is;
 }
@@ -119,8 +103,8 @@ std::ostream &operator<<(std::ostream &os, const EndReason &reason) {
         case EndReason::TIMEOUT:
             os << "TIMEOUT";
             break;
-        case EndReason::ILLIGAL_MOVE:
-            os << "ILLIGAL_MOVE";
+        case EndReason::ILLEGAL_MOVE:
+            os << "ILLEGAL_MOVE";
             break;
         default:
             os << "UNKNOWN";
@@ -142,8 +126,8 @@ std::istream &operator>>(std::istream &is, EndReason &reason) {
         reason = EndReason::RESIGN;
     } else if (str == "TIMEOUT") {
         reason = EndReason::TIMEOUT;
-    } else if (str == "ILLIGAL_MOVE") {
-        reason = EndReason::ILLIGAL_MOVE;
+    } else if (str == "ILLEGAL_MOVE") {
+        reason = EndReason::ILLEGAL_MOVE;
     } else {
         reason = EndReason::NONE;
     }

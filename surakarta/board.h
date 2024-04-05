@@ -10,17 +10,17 @@
 
 class Board : public std::vector<std::vector<std::shared_ptr<Piece>>> {
 public:
-    unsigned int board_size_;
+    unsigned int boardSize;
 
-    explicit Board(unsigned int board_size) : board_size_(board_size) {
-        for (unsigned int i = 0; i < board_size_; i++) {
-            this->emplace_back(board_size_);
+    explicit Board(unsigned int boardSize) : boardSize(boardSize) {
+        for (unsigned int i = 0; i < boardSize; i++) {
+            this->emplace_back(boardSize);
         }
     }
 
     friend inline std::ostream &operator<<(std::ostream &os, const Board &board) {
-        for (unsigned int y = 0; y < board.board_size_; y++) {
-            for (unsigned int x = 0; x < board.board_size_; x++) {
+        for (unsigned int y = 0; y < board.boardSize; y++) {
+            for (unsigned int x = 0; x < board.boardSize; x++) {
                 os << (*board[x][y]) << " ";
             }
             os << std::endl;
@@ -29,8 +29,8 @@ public:
     }
 
     friend inline std::istream &operator>>(std::istream &is, Board &board) {
-        for (unsigned int y = 0; y < board.board_size_; y++) {
-            for (unsigned int x = 0; x < board.board_size_; x++) {
+        for (unsigned int y = 0; y < board.boardSize; y++) {
+            for (unsigned int x = 0; x < board.boardSize; x++) {
                 char ch;
                 is >> ch;
                 PieceColor color;

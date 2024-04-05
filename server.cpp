@@ -32,45 +32,46 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 void Server::startGame() {
     auto game = std::make_unique<Game>();
     game->StartGame();
-    int current_player = 1;
+    int currentPlayer = 1;
     Player current_player_color = Player::BLACK;
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
     while (!game->IsEnd()) {
         QEventLoop loop;
-        if (current_player == 1) {
+        if (currentPlayer == 1) {
             connect(client1, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
         } else {
             connect(client2, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
         }
         loop.exec();
-        const auto client = (current_player == 1) ? client1 : client2;
+        const auto client = (currentPlayer == 1) ? client1 : client2;
         if (client->bytesAvailable() > 0) {
             QByteArray data = client->readAll();
-            qDebug() << "Received data from client " << current_player << " : " << data << "\n";
+            qDebug() << "Received data from client " << currentPlayer << " : " << data << "\n";
             QList<int> numbers;
             QList<QByteArray> dataList = data.split(';');
-            for (const QByteArray &slice : dataList) {
+            for (const QByteArray &slice: dataList) {
                 numbers.append(slice.toInt());
             }
-            auto currentMove = Move(Position(numbers[0], numbers[1]), Position(numbers[2], numbers[3]), current_player_color);
+            auto currentMove = Move(Position(numbers[0], numbers[1]), Position(numbers[2], numbers[3]),
+                                    current_player_color);
             game->Move(currentMove);
-            std::cout << *game->GetGameInfo() << std::endl;
-            std::cout << *game->GetBoard() << std::endl;
+            std::cerr << *game->GetGameInfo() << std::endl;
+            std::cerr << *game->GetBoard() << std::endl;
         }
-        auto clearBuffer = [](auto& client) {
+        auto clearBuffer = [](auto &client) {
             if (client->bytesAvailable() > 0) {
                 client->read(client->bytesAvailable());
             }
         };
         clearBuffer(client1);
         clearBuffer(client2);
-        current_player = (current_player == 1) ? 2 : 1;
+        currentPlayer = (currentPlayer == 1) ? 2 : 1;
         current_player_color = ReverseColor(current_player_color);
     }
     qDebug() << "GAME ENDS!";
-    std::cout << *game->GetBoard();
-    std::cout << game->GetGameInfo()->endReason << std::endl;
-    std::cout << game->GetGameInfo()->winner << std::endl;
+    std::cerr << *game->GetBoard();
+    std::cerr << game->GetGameInfo()->endReason << std::endl;
+    std::cerr << game->GetGameInfo()->winner << std::endl;
 }
 
 void Server::socketDisconnected1() {
@@ -90,12 +91,12 @@ void Server::socketDisconnected2() {
 void Server::socketDisconnected() {
     if (client1) {
         qDebug() << "Client 1 stopped.";
-        client1 -> deleteLater();
+        client1->deleteLater();
         client1 = nullptr;
     }
     if (client2) {
         qDebug() << "Client 2 stopped.";
-        client2 -> deleteLater();
+        client2->deleteLater();
         client2 = nullptr;
     }
 }

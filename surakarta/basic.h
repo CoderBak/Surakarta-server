@@ -44,12 +44,12 @@ struct GameInfo {
     bool IsEnd() const { return endReason != EndReason::NONE; }
 
     friend std::ostream &operator<<(std::ostream &os, const GameInfo &game_info) {
-        os << "current_player: " << game_info.currentPlayer << std::endl;
+        os << "currentPlayer: " << game_info.currentPlayer << std::endl;
         os << "num_round: " << game_info.numRound << std::endl;
         os << "last_captured_round: " << game_info.lastCapturedRound << std::endl;
-        os << "end_reason: " << game_info.endReason << std::endl;
+        os << "endReason: " << game_info.endReason << std::endl;
         os << "winner: " << game_info.winner << std::endl;
-        os << "max_no_capture_round: " << game_info.maxNoCaptureRound << std::endl;
+        os << "maxNoCaptureRound: " << game_info.maxNoCaptureRound << std::endl;
         return os;
     }
 

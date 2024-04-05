@@ -1,7 +1,3 @@
-//
-// Created by CoderBak on 2024/4/5.
-//
-
 #ifndef REASON_H
 #define REASON_H
 
@@ -9,17 +5,17 @@
 
 #include <iostream>
 
-enum class IllegalMoveReason {
+enum class MoveReason {
     LEGAL, // unused
-    LEGAL_CAPTURE_MOVE, // capture a opponent's piece, and the move consists at least one corner loop
+    LEGAL_CAPTURE_MOVE, // capture an opponent's piece, and the move consists at least one corner loop
     LEGAL_NON_CAPTURE_MOVE, // just as the name
-    ILLIGAL, // unused
+    ILLEGAL, // unused
     NOT_PLAYER_TURN, // move when it's not the player's turn.
     OUT_OF_BOARD, // from or to position is out of board
     NOT_PIECE, // move a position that is not a piece
     NOT_PLAYER_PIECE, // move a piece that is not the player's
-    ILLIGAL_CAPTURE_MOVE, // try to capture a opponent's piece, but the move can't consist any corner loop
-    ILLIGAL_NON_CAPTURE_MOVE, // otherwise
+    ILLEGAL_CAPTURE_MOVE, // try to capture an opponent's piece, but the move can't consist any corner loop
+    ILLEGAL_NON_CAPTURE_MOVE, // otherwise
     GAME_ALREADY_END, // unused
     GAME_NOT_START // unused
 };
@@ -31,16 +27,16 @@ enum class EndReason {
     TRAPPED, // unused, one player's pieces are all trapped, no legal move can be made.
     RESIGN, // one player resigns.
     TIMEOUT, // one player's time is out.
-    ILLIGAL_MOVE, // one player makes an illegal move
+    ILLEGAL_MOVE, // one player makes an illegal move
 };
 
-bool IsLegalMoveReason(IllegalMoveReason reason);
+bool IsLegalMoveReason(MoveReason reason);
 
 bool IsEndReason(EndReason reason);
 
-std::ostream &operator<<(std::ostream &os, const IllegalMoveReason &reason);
+std::ostream &operator<<(std::ostream &os, const MoveReason &reason);
 
-std::istream &operator>>(std::istream &is, IllegalMoveReason &reason);
+std::istream &operator>>(std::istream &is, MoveReason &reason);
 
 std::ostream &operator<<(std::ostream &os, const EndReason &reason);
 

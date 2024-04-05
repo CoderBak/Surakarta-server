@@ -10,27 +10,19 @@
 
 class RuleManager {
 public:
-    RuleManager() = default;
+    RuleManager(const std::shared_ptr<Board> &board, const std::shared_ptr<GameInfo> &gameInfo) :
+            boardSize(board->boardSize), board(std::const_pointer_cast<const Board>(board)),
+            gameInfo(std::const_pointer_cast<const GameInfo>(gameInfo)) {}
 
-    RuleManager(const std::shared_ptr<Board> &board, const std::shared_ptr<GameInfo> &game_info) :
-            board_size_(board->board_size_), board_(std::const_pointer_cast<const Board>(board)),
-            game_info_(std::const_pointer_cast<const GameInfo>(game_info)) {}
+    // Judge whether a move is legal.
+    virtual MoveReason JudgeMove(const Move &move);
 
-    /**
-     * @brief Judge whether a move is legal.
-     * @param move The move to be judged.
-     */
-    virtual IllegalMoveReason JudgeMove(const Move &move);
+    // Judge whether the game is end.
+    virtual std::pair<EndReason, Player> JudgeEnd(const MoveReason &reason);
 
-    /**
-     * @brief Judge whether the game is end.
-     * @param reason IllegalMoveReason of the last move.
-     */
-    virtual std::pair<EndReason, Player> JudgeEnd(const IllegalMoveReason &reason);
-
-    unsigned int board_size_{};
-    std::shared_ptr<const Board> board_;
-    std::shared_ptr<const GameInfo> game_info_;
+    unsigned int boardSize;
+    std::shared_ptr<const Board> board;
+    std::shared_ptr<const GameInfo> gameInfo;
 };
 
 // Tool functions
