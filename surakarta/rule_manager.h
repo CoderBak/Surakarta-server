@@ -16,8 +16,6 @@ public:
             board_size_(board->board_size_), board_(std::const_pointer_cast<const Board>(board)),
             game_info_(std::const_pointer_cast<const GameInfo>(game_info)) {}
 
-    virtual void OnUpdateBoard();
-
     /**
      * @brief Judge whether a move is legal.
      * @param move The move to be judged.
@@ -30,7 +28,7 @@ public:
      */
     virtual std::pair<EndReason, Player> JudgeEnd(const IllegalMoveReason &reason);
 
-    unsigned int board_size_;
+    unsigned int board_size_{};
     std::shared_ptr<const Board> board_;
     std::shared_ptr<const GameInfo> game_info_;
 };
@@ -40,7 +38,7 @@ enum class Direction {
     NORTH, SOUTH, WEST, EAST
 };
 
-// Get the next postition and direction of a move.
+// Get the next position and direction of a move.
 std::pair<Position, Direction> get_next_pos(Position from, Direction dir, int n);
 
 // Search for all the reachable points.

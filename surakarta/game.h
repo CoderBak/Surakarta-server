@@ -9,11 +9,11 @@
 
 class MoveResponse {
 public:
-    MoveResponse(IllegalMoveReason move_reason) :
+    explicit MoveResponse(IllegalMoveReason move_reason) :
             move_reason_(move_reason), end_reason_(EndReason::NONE), winner_(Player::NONE) {}
 
-    MoveResponse(IllegalMoveReason move_reason, EndReason end_reason,
-                 Player winner) :
+    explicit MoveResponse(IllegalMoveReason move_reason, EndReason end_reason,
+                          Player winner) :
             move_reason_(move_reason), end_reason_(end_reason), winner_(winner) {}
 
     bool IsLegal() const { return IsLegalMoveReason(move_reason_); }
@@ -26,13 +26,14 @@ public:
 
     Player GetWinner() const { return winner_; }
 
-    //    private:
     IllegalMoveReason move_reason_;
     EndReason end_reason_;
     Player winner_;
 };
 
-class Game {
+class Game : public QObject {
+Q_OBJECT
+
 public:
     explicit Game(unsigned board_size = BOARD_SIZE, unsigned int max_no_capture_round = 40) :
             board_size_(board_size), board_(std::make_shared<Board>(board_size)),
@@ -76,6 +77,16 @@ public:
     std::shared_ptr<GameInfo> game_info_;
     std::shared_ptr<RuleManager> rule_manager_;
     std::shared_ptr<AgentBase> agent_;
+
+    void updateBoard() {
+        std::ostringstream oss;
+        oss << (*board_);
+        emit boardUpdated(QString::fromStdString(oss.str()));
+    }
+
+signals:
+
+    void boardUpdated(const QString &boardInfo);
 };
 
 

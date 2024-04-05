@@ -22,7 +22,7 @@ void Game::StartGame(std::string file_name) {
         fin >> (*game_info_);
         fin.close();
     }
-    rule_manager_->OnUpdateBoard();
+    updateBoard();
 }
 
 void Game::SaveGame(std::string file_name) const {
@@ -53,13 +53,13 @@ MoveResponse Game::Move(const class Move &move) {
         std::swap((*board_)[move.to.x][move.to.y], (*board_)[move.from.x][move.from.y]);
         (*board_)[move.to.x][move.to.y]->SetPosition(move.to);
         (*board_)[move.from.x][move.from.y]->SetPosition(move.from);
-        rule_manager_->OnUpdateBoard();
+        updateBoard();
     } else if (move_reason == IllegalMoveReason::LEGAL_CAPTURE_MOVE) {
         (*board_)[move.to.x][move.to.y] = (*board_)[move.from.x][move.from.y];
         (*board_)[move.to.x][move.to.y]->SetPosition(move.to);
         (*board_)[move.from.x][move.from.y] =
                 std::make_shared<Piece>(move.from.x, move.from.y, PieceColor::NONE);
-        rule_manager_->OnUpdateBoard();
+        updateBoard();
     }
     MoveResponse response(move_reason, end_reason, winner);
     return response;

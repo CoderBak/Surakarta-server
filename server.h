@@ -20,6 +20,7 @@ private slots:
     void socketDisconnected1();
     void socketDisconnected2();
     void socketDisconnected();
+    void onBoardUpdated(const QString &boardInfo);
 
 private:
     QTcpSocket *client1, *client2;

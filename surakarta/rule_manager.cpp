@@ -73,14 +73,6 @@ bool check_valid_move(const Position from, const Position to,
     return result;
 }
 
-void RuleManager::OnUpdateBoard() {
-    // TODO:
-    // Every time the board and game_info is updated to the next round version, this function will be called.
-    // You don't need to implement this function if you don't need it.
-    // A more delicate way is to use Qt's signal and slot mechanism, but that's the advanced part.
-    std::cout << "BOARD_UPDATED!" << std::endl;
-}
-
 IllegalMoveReason RuleManager::JudgeMove(const Move &move) {
     auto [from, to, player] = move;
     const Player current_player = game_info_->currentPlayer;

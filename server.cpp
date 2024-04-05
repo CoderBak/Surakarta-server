@@ -30,11 +30,12 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
-    Game game;
-    game.StartGame();
+    auto game = std::make_unique<Game>();
+    game->StartGame();
     int current_player = 1;
     Player current_player_color = Player::BLACK;
-    while (!game.IsEnd()) {
+    connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
+    while (!game->IsEnd()) {
         QEventLoop loop;
         if (current_player == 1) {
             connect(client1, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
@@ -52,9 +53,9 @@ void Server::startGame() {
                 numbers.append(slice.toInt());
             }
             auto currentMove = Move(Position(numbers[0], numbers[1]), Position(numbers[2], numbers[3]), current_player_color);
-            game.Move(currentMove);
-            std::cout << *game.GetGameInfo() << std::endl;
-            std::cout << *game.GetBoard() << std::endl;
+            game->Move(currentMove);
+            std::cout << *game->GetGameInfo() << std::endl;
+            std::cout << *game->GetBoard() << std::endl;
         }
         auto clearBuffer = [](auto& client) {
             if (client->bytesAvailable() > 0) {
@@ -67,9 +68,9 @@ void Server::startGame() {
         current_player_color = ReverseColor(current_player_color);
     }
     qDebug() << "GAME ENDS!";
-    std::cout << *game.GetBoard();
-    std::cout << game.GetGameInfo()->endReason << std::endl;
-    std::cout << game.GetGameInfo()->winner << std::endl;
+    std::cout << *game->GetBoard();
+    std::cout << game->GetGameInfo()->endReason << std::endl;
+    std::cout << game->GetGameInfo()->winner << std::endl;
 }
 
 void Server::socketDisconnected1() {
@@ -97,4 +98,11 @@ void Server::socketDisconnected() {
         client2 -> deleteLater();
         client2 = nullptr;
     }
+}
+
+void Server::onBoardUpdated(const QString &boardInfo) {
+    qDebug() << "Board Updated!";
+    qDebug() << boardInfo << "\n";
+    client1->write(boardInfo.toUtf8());
+    client2->write(boardInfo.toUtf8());
 }
