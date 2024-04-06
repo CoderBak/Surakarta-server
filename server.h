@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QObject>
 #include <QTimer>
+#include "surakarta/basic.h"
 
 class Server : public QTcpServer {
 Q_OBJECT
@@ -29,6 +30,8 @@ private slots:
 
 private:
     QTcpSocket *client1, *client2;
+
+    static std::pair<Position, Position> moveMessageHandler(const QByteArray& data);
 };
 
 #endif // SERVER_H

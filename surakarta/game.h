@@ -6,7 +6,12 @@
 #include "basic.h"
 #include "rule_manager.h"
 
-struct MoveResponse {
+class MoveResponse {
+public:
+    explicit MoveResponse(MoveReason moveReason, EndReason endReason,
+                          Player winner) :
+            moveReason(moveReason), endReason(endReason), winner(winner) {}
+
     MoveReason moveReason;
     EndReason endReason;
     Player winner;

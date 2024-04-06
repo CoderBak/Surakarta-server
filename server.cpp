@@ -37,23 +37,14 @@ void Server::startGame() {
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
     while (!game->IsEnd()) {
         QEventLoop loop;
-        if (currentPlayer == 1) {
-            connect(client1, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
-        } else {
-            connect(client2, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
-        }
-        loop.exec();
         const auto client = (currentPlayer == 1) ? client1 : client2;
+        connect(client, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
+        loop.exec();
         if (client->bytesAvailable() > 0) {
             QByteArray data = client->readAll();
             qDebug() << "Received data from client " << currentPlayer << " : " << data << "\n";
-            QList<int> numbers;
-            QList<QByteArray> dataList = data.split(';');
-            for (const QByteArray &slice: dataList) {
-                numbers.append(slice.toInt());
-            }
-            auto currentMove = Move(Position(numbers[0], numbers[1]), Position(numbers[2], numbers[3]),
-                                    current_player_color);
+            auto [from, to] = moveMessageHandler(data);
+            auto currentMove = Move(from, to, current_player_color);
             game->Move(currentMove);
             std::cerr << *game->GetGameInfo() << std::endl;
             std::cerr << *game->GetBoard() << std::endl;
@@ -72,6 +63,18 @@ void Server::startGame() {
     std::cerr << *game->GetBoard();
     std::cerr << game->GetGameInfo()->endReason << std::endl;
     std::cerr << game->GetGameInfo()->winner << std::endl;
+}
+
+std::pair<Position, Position> Server::moveMessageHandler(const QByteArray& data) {
+    // When perform move, the info format is : M4;5;3;4
+    QByteArray dataCopy = data;
+    dataCopy.remove(0, 1);
+    QList<int> idx;
+    QList<QByteArray> dataList = dataCopy.split(';');
+    for (const QByteArray &slice: dataList) {
+        idx.append(slice.toInt());
+    }
+    return std::make_pair(Position(idx[0], idx[1]), Position(idx[2], idx[3]));
 }
 
 void Server::socketDisconnected1() {
