@@ -5,8 +5,8 @@
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr) {
-    if (!listen(QHostAddress::Any, 1234)) {
-        qDebug() << "Unable to listen at port 1234.";
+    if (!listen(QHostAddress::Any, 1233)) {
+        qDebug() << "Unable to listen at port 1233.";
         exit(-1);
     } else {
         qDebug() << "Server established!";
