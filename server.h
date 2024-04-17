@@ -31,7 +31,7 @@ private slots:
 private:
     QTcpSocket *client1, *client2;
 
-    static std::pair<Position, Position> moveMessageHandler(const QByteArray& data);
+    static std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
 };
 
 #endif // SERVER_H

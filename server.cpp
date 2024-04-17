@@ -32,9 +32,16 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 void Server::startGame() {
     auto game = std::make_unique<Game>();
     game->StartGame();
-    int currentPlayer = 1;
+    int currentPlayer = (rand() % 2 + 2) % 2 + 1;
     Player current_player_color = Player::BLACK;
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
+    if (currentPlayer == 1) {
+        client1->write("SB;"); // Side: B
+        client2->write("SW;"); // Side: W
+    } else {
+        client1->write("SW;");
+        client2->write("SB;");
+    }
     while (!game->IsEnd()) {
         QEventLoop loop;
         const auto client = (currentPlayer == 1) ? client1 : client2;
@@ -65,7 +72,7 @@ void Server::startGame() {
     std::cerr << game->GetGameInfo()->winner << std::endl;
 }
 
-std::pair<Position, Position> Server::moveMessageHandler(const QByteArray& data) {
+std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray dataCopy = data;
     dataCopy.remove(0, 1);

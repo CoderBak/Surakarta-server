@@ -26,7 +26,6 @@ set(PROJECT_SOURCES
         surakarta/rule_manager.cpp
         surakarta/rule_manager.h
         surakarta/reason.h
-        surakarta/utils.h
         surakarta/agent/agent_base.h
         surakarta/piece.h
         surakarta/agent/agent_random.cpp
