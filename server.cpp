@@ -14,6 +14,7 @@ Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(
 }
 
 void Server::incomingConnection(qintptr socketDescriptor) {
+    // Try to connect to 2 clients.
     if (!client1) {
         client1 = new QTcpSocket(this);
         client1->setSocketDescriptor(socketDescriptor);
@@ -30,6 +31,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
+    // Start the game loop.
     auto game = std::make_unique<Game>();
     game->StartGame();
     int currentPlayer = (rand() % 2 + 2) % 2 + 1;
