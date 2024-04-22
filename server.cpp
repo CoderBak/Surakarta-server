@@ -61,6 +61,9 @@ void Server::startGame() {
                 if (!getData(data)) {
                     break;
                 }
+                if (retry) {
+                    break;
+                }
             }
         }
         clearBuffer(client1);
@@ -152,7 +155,7 @@ InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
                     idx.append(slice.toInt());
                 }
                 auto eatable = game->searchEatable(Position(idx[0], idx[1]));
-                QString data = QString("$RN%1").arg(eatable.size());
+                QString data = QString("$RC%1").arg(eatable.size());
                 for (const auto &elem: eatable) {
                     data += QString("|%1;%2").arg(elem.first.y).arg(elem.first.x);
                     for (const auto &piece: elem.second) {
@@ -177,7 +180,7 @@ InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
             }
             return InfoType::DEFAULT;
         }
-        case 'R':
+        case 'G':
             return InfoType::RETRY;
         default:
             return InfoType::DEFAULT;
