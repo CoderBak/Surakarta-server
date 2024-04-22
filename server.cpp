@@ -31,18 +31,24 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
+    bool retry = false;
+    auto clearBuffer = [](auto &client) {
+        if (client->bytesAvailable() > 0) {
+            client->read(client->bytesAvailable());
+        }
+    };
     // Start the game loop.
-    auto game = std::make_unique<Game>();
-    game->StartGame();
-    int currentPlayer = (rand() % 2 + 2) % 2 + 1;
-    Player current_player_color = Player::BLACK;
+    game = std::make_unique<Game>();
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
+    game->StartGame();
+    currentPlayer = (rand() % 2 + 2) % 2 + 1;
+    currentPlayerColor = Player::BLACK;
     if (currentPlayer == 1) {
-        client1->write("SB;"); // Side: B
-        client2->write("SW;"); // Side: W
+        client1->write("$SB;"); // Side: B
+        client2->write("$SW;"); // Side: W
     } else {
-        client1->write("SW;");
-        client2->write("SB;");
+        client1->write("$SW;");
+        client2->write("$SB;");
     }
     while (!game->IsEnd()) {
         QEventLoop loop;
@@ -50,28 +56,46 @@ void Server::startGame() {
         connect(client, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
         loop.exec();
         if (client->bytesAvailable() > 0) {
+            qDebug() << "Now is client" << currentPlayer;
             QByteArray data = client->readAll();
-            qDebug() << "Received data from client " << currentPlayer << " : " << data << "\n";
-            auto [from, to] = moveMessageHandler(data);
-            auto currentMove = Move(from, to, current_player_color);
-            game->Move(currentMove);
-            std::cerr << *game->GetGameInfo() << std::endl;
-            std::cerr << *game->GetBoard() << std::endl;
-        }
-        auto clearBuffer = [](auto &client) {
-            if (client->bytesAvailable() > 0) {
-                client->read(client->bytesAvailable());
+            qDebug() << "Received message from client: " << data;
+            if (data[0] != '$') {
+                qDebug() << "Wrong format!";
+            } else {
+                auto packetHandler = [&](auto packet) {
+                    const auto info = dataHandler(packet);
+                    if (info == InfoType::RETRY) {
+                        retry = true;
+                    }
+                };
+                while (true) {
+                    const auto endPos = data.indexOf('$', 1);
+                    if (endPos != -1) {
+                        packetHandler(data.mid(1, endPos - 1));
+                        data.remove(0, endPos);
+                    } else {
+                        data.remove(0, 1);
+                        packetHandler(data);
+                        break;
+                    }
+                }
             }
-        };
+        }
+        if (retry) {
+            break;
+        }
         clearBuffer(client1);
         clearBuffer(client2);
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
-        current_player_color = ReverseColor(current_player_color);
+        currentPlayerColor = ReverseColor(currentPlayerColor);
     }
     qDebug() << "GAME ENDS!";
     std::cerr << *game->GetBoard();
     std::cerr << game->GetGameInfo()->endReason << std::endl;
     std::cerr << game->GetGameInfo()->winner << std::endl;
+    if (retry) {
+        startGame();
+    }
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
@@ -84,6 +108,19 @@ std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data)
         idx.append(slice.toInt());
     }
     return std::make_pair(Position(idx[0], idx[1]), Position(idx[2], idx[3]));
+}
+
+InfoType Server::dataHandler(const QByteArray &info) {
+    if (info[0] == 'M') {
+        auto [from, to] = moveMessageHandler(info);
+        auto currentMove = Move(from, to, currentPlayerColor);
+        game->Move(currentMove);
+        std::cerr << *game->GetGameInfo() << std::endl;
+        std::cerr << *game->GetBoard() << std::endl;
+        return InfoType::MOVE;
+    } else {
+        return InfoType::RETRY;
+    }
 }
 
 void Server::socketDisconnected1() {
@@ -116,6 +153,6 @@ void Server::socketDisconnected() {
 void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << "Board Updated!";
     qDebug() << boardInfo << "\n";
-    client1->write(boardInfo.toUtf8());
-    client2->write(boardInfo.toUtf8());
+    client1->write("$" + boardInfo.toUtf8());
+    client2->write("$" + boardInfo.toUtf8());
 }
