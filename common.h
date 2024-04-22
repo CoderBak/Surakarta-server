@@ -8,5 +8,6 @@
 
 enum class InfoType {
     MOVE,
-    RETRY
+    RETRY,
+    DEFAULT
 };

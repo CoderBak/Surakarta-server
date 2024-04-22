@@ -31,7 +31,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
-    bool retry = false;
+    retry = false;
     auto clearBuffer = [](auto &client) {
         if (client->bytesAvailable() > 0) {
             client->read(client->bytesAvailable());
@@ -51,41 +51,24 @@ void Server::startGame() {
         client2->write("$SB;");
     }
     while (!game->IsEnd()) {
+        currentClient = (currentPlayer == 1) ? client1 : client2;
         QEventLoop loop;
-        const auto client = (currentPlayer == 1) ? client1 : client2;
-        connect(client, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
-        loop.exec();
-        if (client->bytesAvailable() > 0) {
-            qDebug() << "Now is client" << currentPlayer;
-            QByteArray data = client->readAll();
-            qDebug() << "Received message from client: " << data;
-            if (data[0] != '$') {
-                qDebug() << "Wrong format!";
-            } else {
-                auto packetHandler = [&](auto packet) {
-                    const auto info = dataHandler(packet);
-                    if (info == InfoType::RETRY) {
-                        retry = true;
-                    }
-                };
-                while (true) {
-                    const auto endPos = data.indexOf('$', 1);
-                    if (endPos != -1) {
-                        packetHandler(data.mid(1, endPos - 1));
-                        data.remove(0, endPos);
-                    } else {
-                        data.remove(0, 1);
-                        packetHandler(data);
-                        break;
-                    }
+        connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
+        while (true) {
+            loop.exec();
+            if (currentClient->bytesAvailable() > 0) {
+                QByteArray data = currentClient->read(currentClient->bytesAvailable());
+                if (!getData(data)) {
+                    break;
                 }
             }
         }
+        clearBuffer(client1);
+        clearBuffer(client2);
         if (retry) {
             break;
         }
-        clearBuffer(client1);
-        clearBuffer(client2);
+        //disconnect(currentClient, &QTcpSocket::readyRead, this, &Server::getData);
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerColor = ReverseColor(currentPlayerColor);
     }
@@ -96,6 +79,44 @@ void Server::startGame() {
     if (retry) {
         startGame();
     }
+}
+
+bool Server::getData(QByteArray &data) {
+    bool hasMove = false;
+    qDebug() << "Now is client" << currentPlayer;
+    qDebug() << "Received message from client: " << data;
+    if (data[0] != '$') {
+        qDebug() << "Wrong format!";
+    } else {
+        auto packetHandler = [&](auto packet) {
+            const auto info = dataHandler(packet, currentClient);
+            if (info == InfoType::RETRY) {
+                retry = true;
+            }
+            if (info == InfoType::MOVE) {
+                hasMove = true;
+            }
+        };
+        while (true) {
+            qDebug() << data;
+            const auto endPos = data.indexOf('$', 1);
+            if (endPos != -1) {
+                packetHandler(data.mid(1, endPos - 1));
+                if (hasMove) {
+                    return false;
+                }
+                data.remove(0, endPos);
+            } else {
+                data.remove(0, 1);
+                packetHandler(data);
+                if (hasMove) {
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+    return true;
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
@@ -110,16 +131,56 @@ std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data)
     return std::make_pair(Position(idx[0], idx[1]), Position(idx[2], idx[3]));
 }
 
-InfoType Server::dataHandler(const QByteArray &info) {
-    if (info[0] == 'M') {
-        auto [from, to] = moveMessageHandler(info);
-        auto currentMove = Move(from, to, currentPlayerColor);
-        game->Move(currentMove);
-        std::cerr << *game->GetGameInfo() << std::endl;
-        std::cerr << *game->GetBoard() << std::endl;
-        return InfoType::MOVE;
-    } else {
-        return InfoType::RETRY;
+InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
+    switch (info[0]) {
+        case 'M': {
+            auto [from, to] = moveMessageHandler(info);
+            auto currentMove = Move(from, to, currentPlayerColor);
+            game->Move(currentMove);
+            std::cerr << *game->GetGameInfo() << std::endl;
+            std::cerr << *game->GetBoard() << std::endl;
+            return InfoType::MOVE;
+        }
+        case 'Q': {
+            // If we want valid capture.
+            if (info[1] == 'C') {
+                QByteArray dataCopy = info;
+                dataCopy.remove(0, 2);
+                QList<int> idx;
+                QList<QByteArray> dataList = dataCopy.split(';');
+                for (const QByteArray &slice: dataList) {
+                    idx.append(slice.toInt());
+                }
+                auto eatable = game->searchEatable(Position(idx[0], idx[1]));
+                QString data = QString("$RN%1").arg(eatable.size());
+                for (const auto &elem: eatable) {
+                    data += QString("|%1;%2").arg(elem.first.y).arg(elem.first.x);
+                    for (const auto &piece: elem.second) {
+                        data += QString("@%1;%2").arg(piece.y).arg(piece.x);
+                    }
+                }
+                client->write(data.toUtf8());
+            } else {
+                QByteArray dataCopy = info;
+                dataCopy.remove(0, 2);
+                QList<int> idx;
+                QList<QByteArray> dataList = dataCopy.split(';');
+                for (const QByteArray &slice: dataList) {
+                    idx.append(slice.toInt());
+                }
+                auto movable = game->searchMovable(Position(idx[0], idx[1]));
+                QString data = QString("$RN%1").arg(movable.size());
+                for (const auto &elem: movable) {
+                    data += QString("|%1;%2").arg(elem.y).arg(elem.x);
+                }
+                client->write(data.toUtf8());
+            }
+            return InfoType::DEFAULT;
+        }
+        case 'R':
+            return InfoType::RETRY;
+        default:
+            return InfoType::DEFAULT;
     }
 }
 

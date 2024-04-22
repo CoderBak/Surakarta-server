@@ -6,6 +6,8 @@
 #include "basic.h"
 #include "rule_manager.h"
 
+using pair = std::pair<Position, std::vector<Position>>;
+
 class MoveResponse {
 public:
     explicit MoveResponse(MoveReason moveReason, EndReason endReason,
@@ -52,6 +54,10 @@ public:
         oss << (*board);
         emit boardUpdated(QString::fromStdString(oss.str()));
     }
+
+    std::vector<pair> searchEatable(const Position &from) const;
+
+    std::vector<Position> searchMovable(const Position &from) const;
 
 signals:
 

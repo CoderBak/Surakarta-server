@@ -29,16 +29,20 @@ private slots:
 
     void onBoardUpdated(const QString &boardInfo);
 
-private:
-    InfoType dataHandler(const QByteArray &info);
+    bool getData(QByteArray &data);
 
-    QTcpSocket *client1, *client2;
+private:
+    InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
+
+    QTcpSocket *client1, *client2, *currentClient;
 
     int currentPlayer;
 
     Player currentPlayerColor;
 
     std::unique_ptr<Game> game;
+
+    bool retry;
 
     static std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
 };
