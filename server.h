@@ -32,7 +32,11 @@ private slots:
 
     bool getData(QByteArray &data);
 
-    void updateTimeSlot(QString time);
+    void updateTimeSlot1(QString time);
+
+    void updateTimeSlot2(QString time);
+
+    //void resetTimerSlot();
 
 private:
     InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
@@ -47,9 +51,11 @@ private:
 
     bool retry;
 
-    static std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
+    std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
 
-    Timer *timer;
+    Timer *totalTimer;
+    Timer *resetTimer;
+    bool resetNeeded;
 };
 
 #endif // SERVER_H
