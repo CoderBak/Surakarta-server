@@ -7,6 +7,7 @@
 #include <QTimer>
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
+#include "timerThread.h"
 
 class Server : public QTcpServer {
 Q_OBJECT
@@ -31,6 +32,8 @@ private slots:
 
     bool getData(QByteArray &data);
 
+    void updateTimeSlot(QString time);
+
 private:
     InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
 
@@ -45,6 +48,8 @@ private:
     bool retry;
 
     static std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
+
+    TimerThread *timerThread;
 };
 
 #endif // SERVER_H

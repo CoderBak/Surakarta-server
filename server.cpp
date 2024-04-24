@@ -4,7 +4,7 @@
 #include "surakarta/game.h"
 #include <QEventLoop>
 
-Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr) {
+Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),timerThread(new TimerThread(this)) {
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -26,6 +26,8 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         connect(client2, &QTcpSocket::disconnected, this, &Server::socketDisconnected2);
         qDebug() << "Client 2 connected.";
         qDebug() << "2 players ready, start the game now!\n";
+        connect(timerThread, &TimerThread::updateTime, this, &Server::updateTimeSlot);
+        timerThread->start();
         startGame();
     }
 }
@@ -120,6 +122,26 @@ bool Server::getData(QByteArray &data) {
         }
     }
     return true;
+}
+
+void Server::updateTimeSlot(QString time)
+{
+        static QTime startTime = QTime::fromString("00:00:00", "hh:mm:ss"); // record initial time
+        static QTime currentTime = startTime;
+
+        // update time
+        currentTime = currentTime.addSecs(1);
+
+        // send to client
+
+        QString formattedTime = currentTime.toString("hh:mm:ss");
+        QByteArray timeData = formattedTime.toUtf8();
+        QByteArray message;
+        message.append("$TIME:");
+        message.append(timeData);
+        // qDebug()<<message;
+        client1->write(message);
+        client2->write(message);
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {

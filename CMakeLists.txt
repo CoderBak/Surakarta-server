@@ -30,6 +30,8 @@ set(PROJECT_SOURCES
         surakarta/piece.h
         surakarta/agent/agent_random.cpp
         surakarta/agent/agent_random.h
+        timerThread.h
+        timerThread.cpp
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
