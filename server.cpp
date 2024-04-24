@@ -4,7 +4,8 @@
 #include "surakarta/game.h"
 #include <QEventLoop>
 
-Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),timerThread(new TimerThread(this)) {
+Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
+                                  timerThread(new TimerThread(this)) {
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -73,7 +74,6 @@ void Server::startGame() {
         if (retry) {
             break;
         }
-        //disconnect(currentClient, &QTcpSocket::readyRead, this, &Server::getData);
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerColor = ReverseColor(currentPlayerColor);
     }
@@ -92,56 +92,55 @@ bool Server::getData(QByteArray &data) {
     qDebug() << "Received message from client: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
-    } else {
-        auto packetHandler = [&](auto packet) {
-            const auto info = dataHandler(packet, currentClient);
-            if (info == InfoType::RETRY) {
-                retry = true;
+        return true;
+    }
+    auto packetHandler = [&](auto packet) {
+        const auto info = dataHandler(packet, currentClient);
+        if (info == InfoType::RETRY) {
+            retry = true;
+        }
+        if (info == InfoType::MOVE) {
+            hasMove = true;
+        }
+    };
+    while (true) {
+        qDebug() << data;
+        const auto endPos = data.indexOf('$', 1);
+        if (endPos != -1) {
+            packetHandler(data.mid(1, endPos - 1));
+            if (hasMove) {
+                return false;
             }
-            if (info == InfoType::MOVE) {
-                hasMove = true;
+            data.remove(0, endPos);
+        } else {
+            data.remove(0, 1);
+            packetHandler(data);
+            if (hasMove) {
+                return false;
             }
-        };
-        while (true) {
-            qDebug() << data;
-            const auto endPos = data.indexOf('$', 1);
-            if (endPos != -1) {
-                packetHandler(data.mid(1, endPos - 1));
-                if (hasMove) {
-                    return false;
-                }
-                data.remove(0, endPos);
-            } else {
-                data.remove(0, 1);
-                packetHandler(data);
-                if (hasMove) {
-                    return false;
-                }
-                break;
-            }
+            break;
         }
     }
     return true;
 }
 
-void Server::updateTimeSlot(QString time)
-{
-        static QTime startTime = QTime::fromString("00:00:00", "hh:mm:ss"); // record initial time
-        static QTime currentTime = startTime;
+void Server::updateTimeSlot(QString time) {
+    static QTime startTime = QTime::fromString("00:00:00", "hh:mm:ss"); // record initial time
+    static QTime currentTime = startTime;
 
-        // update time
-        currentTime = currentTime.addSecs(1);
+    // update time
+    currentTime = currentTime.addSecs(1);
 
-        // send to client
+    // send to client
 
-        QString formattedTime = currentTime.toString("hh:mm:ss");
-        QByteArray timeData = formattedTime.toUtf8();
-        QByteArray message;
-        message.append("$TIME:");
-        message.append(timeData);
-        // qDebug()<<message;
-        client1->write(message);
-        client2->write(message);
+    QString formattedTime = currentTime.toString("hh:mm:ss");
+    QByteArray timeData = formattedTime.toUtf8();
+    QByteArray message;
+    message.append("$TIME:");
+    message.append(timeData);
+    // qDebug()<<message;
+    client1->write(message);
+    client2->write(message);
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
