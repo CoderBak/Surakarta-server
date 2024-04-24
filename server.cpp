@@ -5,7 +5,7 @@
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
-                                  timerThread(new TimerThread(this)) {
+                                  timer(new Timer(this)) {
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -27,8 +27,8 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         connect(client2, &QTcpSocket::disconnected, this, &Server::socketDisconnected2);
         qDebug() << "Client 2 connected.";
         qDebug() << "2 players ready, start the game now!\n";
-        connect(timerThread, &TimerThread::updateTime, this, &Server::updateTimeSlot);
-        timerThread->start();
+        timer->start();
+        connect(timer, &Timer::updateTime, this, &Server::updateTimeSlot);
         startGame();
     }
 }
@@ -233,6 +233,9 @@ void Server::socketDisconnected() {
         client2->deleteLater();
         client2 = nullptr;
     }
+    timer->stop();
+    timer->deleteLater();
+    timer = new Timer(this);
 }
 
 void Server::onBoardUpdated(const QString &boardInfo) {

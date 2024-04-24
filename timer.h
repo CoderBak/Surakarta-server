@@ -1,15 +1,15 @@
-#ifndef TIMERTHREAD_H
-#define TIMERTHREAD_H
+#ifndef TIMER_H
+#define TIMER_H
 
 #include <QThread>
 #include <QString>
 #include <QDateTime>
 
-class TimerThread : public QThread {
+class Timer : public QThread {
 Q_OBJECT
 
 public:
-    explicit TimerThread(QObject *parent = nullptr) : QThread(parent), m_running(true) {}
+    explicit Timer(QObject *parent = nullptr) : QThread(parent), m_running(true) {}
 
     void stop() {
         m_running = false;
@@ -34,4 +34,4 @@ private:
     bool m_running;
 };
 
-#endif // TIMERTHREAD_H
+#endif // TIMER_H

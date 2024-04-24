@@ -7,7 +7,7 @@
 #include <QTimer>
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
-#include "timerThread.h"
+#include "timer.h"
 
 class Server : public QTcpServer {
 Q_OBJECT
@@ -49,7 +49,7 @@ private:
 
     static std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
 
-    TimerThread *timerThread;
+    Timer *timer;
 };
 
 #endif // SERVER_H
