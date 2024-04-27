@@ -36,6 +36,8 @@ private slots:
 
     void updateTimeSlot2(QString time);
 
+    void upDateTimeOut();
+
     //void resetTimerSlot();
 
 private:
@@ -50,12 +52,12 @@ private:
     std::unique_ptr<Game> game;
 
     bool retry;
+    bool timeOut;
 
     std::pair<Position, Position> moveMessageHandler(const QByteArray &data);
 
     Timer *totalTimer;
     Timer *resetTimer;
-    bool resetNeeded;
 };
 
 #endif // SERVER_H
