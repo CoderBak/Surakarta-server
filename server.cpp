@@ -5,7 +5,7 @@
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
-    totalTimer(new Timer(this)),resetTimer(new Timer(this)),resetNeeded(false) {
+    totalTimer(new Timer(this)),resetTimer(new Timer(this)),timeOut(false){
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -29,6 +29,8 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         qDebug() << "2 players ready, start the game now!\n";
         connect(totalTimer, &Timer::updateTime, this, &Server::updateTimeSlot1);
         connect(resetTimer, &Timer::updateTime, this, &Server::updateTimeSlot2);
+        connect(resetTimer, &Timer::timeOut, this, &Server::upDateTimeOut);
+        connect(totalTimer, &Timer::timeOut, this, &Server::upDateTimeOut);
         totalTimer->start();
         resetTimer->start();
         // connect(resetTimer, &Timer::timeReset, this, &Server::resetTimerSlot);
@@ -68,8 +70,13 @@ void Server::startGame() {
                     break;
                 }
                 if (retry) {
+                    totalTimer->reset();
+                    resetTimer->reset();
                     break;
                 }
+                // if(timeOut){
+                //     break;
+                // }
             }
         }
         clearBuffer(client1);
@@ -77,6 +84,10 @@ void Server::startGame() {
         if (retry) {
             break;
         }
+        // if(timeOut){
+        //     timeOut=false;
+        //     break;
+        // }
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerColor = ReverseColor(currentPlayerColor);
     }
@@ -128,14 +139,12 @@ bool Server::getData(QByteArray &data) {
 }
 
 void Server::updateTimeSlot1(QString time) {
-    static QTime startTime = QTime::fromString("00:00:00", "hh:mm:ss"); // record initial time
-    static QTime currentTime = startTime;
 
-    // update time
-    currentTime = currentTime.addSecs(1);
-
-    // send to client
-    QString formattedTime = currentTime.toString("hh:mm:ss");
+    // qDebug()<<time<<"server first time";
+    QTime startTime=QTime::fromString(time);
+    // qDebug()<<startTime<<"starttime";
+    startTime = startTime.addSecs(1);
+    QString formattedTime = startTime.toString("hh:mm:ss");
     QByteArray timeData = formattedTime.toUtf8();
     QByteArray message;
     message.append("$TIME:T");
@@ -158,6 +167,43 @@ void Server::updateTimeSlot2(QString time) {
     // qDebug()<<message;
     client1->write(message);
     client2->write(message);
+}
+
+void Server::upDateTimeOut()
+{
+    if(resetTimer->getTime()>maxSecond)
+    {
+        QByteArray message1,message2;
+        message1.append("$ET");
+        message2.append("$EF");
+        if(currentClient==client1){
+            client1->write(message1);
+            client2->write(message2);
+            game->gameInfo->winner=ReverseColor(currentPlayerColor);
+        }
+        else{
+            client2->write(message1);
+            client1->write(message2);
+            game->gameInfo->winner=ReverseColor(currentPlayerColor);
+        }
+        totalTimer->reset();
+        resetTimer->reset();
+        totalTimer->stop();
+        resetTimer->stop();
+        qDebug()<<"Time out!";
+        // timeOut=true;
+        auto clearBuffer = [](auto &client) {
+            if (client->bytesAvailable() > 0) {
+                client->read(client->bytesAvailable());
+            }
+        };
+        clearBuffer(client1);
+        clearBuffer(client2);
+        qDebug() << "GAME ENDS!";
+        std::cerr << *game->GetBoard();
+        std::cerr << game->GetGameInfo()->endReason << std::endl;
+        std::cerr << game->GetGameInfo()->winner << std::endl;
+    }
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
