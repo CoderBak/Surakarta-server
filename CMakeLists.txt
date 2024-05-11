@@ -31,6 +31,12 @@ set(PROJECT_SOURCES
         surakarta/agent/agent_random.cpp
         surakarta/agent/agent_random.h
         timer.h
+        NetworkLibrary/networkdata.cpp
+        NetworkLibrary/networkdata.h
+        NetworkLibrary/networkserver.cpp
+        NetworkLibrary/networkserver.h
+        NetworkLibrary/networksocket.cpp
+        NetworkLibrary/networksocket.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)

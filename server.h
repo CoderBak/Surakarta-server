@@ -8,6 +8,8 @@
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
 #include "timer.h"
+#include "NetworkLibrary/networkdata.h"
+#include "NetworkLibrary/networkserver.h"
 
 class Server : public QTcpServer {
 Q_OBJECT
@@ -38,9 +40,22 @@ private slots:
 
     void upDateTimeOut();
 
+    void listenPort();
+
+    void receiveFromClient(QTcpSocket* client, NetworkData data);
+
+    void restartServer();
+
     //void resetTimerSlot();
 
 private:
+    int port=1233;
+    int maxClients=2;
+    NetworkServer *server1;
+    void removeClient(QTcpSocket*client);
+    void sendToAnotherClient(QTcpSocket*another,NetworkData data);
+    QSet<QTcpSocket*> clients;
+
     InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
 
     QTcpSocket *client1, *client2, *currentClient;
