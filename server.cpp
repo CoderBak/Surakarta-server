@@ -6,6 +6,7 @@
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
     totalTimer(new Timer(this)),resetTimer(new Timer(this)),timeOut(false){
+
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -230,19 +231,17 @@ void Server::receiveFromClient(QTcpSocket* client, NetworkData data)
             client2 = client;
     }
 
-    // if chat
-    // if (client == client1) {
-    //     if (client2 && data.op == OPCODE::CHAT_OP)
-    //         sendToAnotherClient(client2, data);
-    // }
-    // else if (client == client2) {
-    //     if (client1 && data.op == OPCODE::CHAT_OP)
-    //        sendToAnotherClient(client1, data);
-    // }
-    // else
-    //     //QMessageBox::warning(this, "Warning", "Unknown client!");
-    //     qDebug()<<"Unknown client!";
-
+    if (client == client1) {
+        if (client2 && data.op == OPCODE::CHAT_OP)
+            sendToAnotherClient(client2, data);
+    }
+    else if (client == client2) {
+        if (client1 && data.op == OPCODE::CHAT_OP)
+           sendToAnotherClient(client1, data);
+    }
+    else
+        //QMessageBox::warning(this, "Warning", "Unknown client!");
+        qDebug()<<"Unknown client!";
 }
 
 void Server::restartServer()

@@ -50,7 +50,7 @@ private slots:
 
 private:
     int port=1233;
-    int maxClients=2;
+    const int maxClients=2;
     NetworkServer *server1;
     void removeClient(QTcpSocket*client);
     void sendToAnotherClient(QTcpSocket*another,NetworkData data);
