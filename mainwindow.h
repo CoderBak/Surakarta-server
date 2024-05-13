@@ -10,12 +10,11 @@
 
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
+class MainWindow : public QMainWindow {
+Q_OBJECT
 
 public:
     QLineEdit *PortEdit;
@@ -29,23 +28,29 @@ public:
     QStatusBar *statusbar;
 
     explicit MainWindow(QWidget *parent = nullptr);
+
     ~MainWindow() override;
 
 private:
     int port = 1234;
     const int max_clients = 2;
     Ui::MainWindow *ui;
-    QSet<QTcpSocket*> clients;
-    NetworkServer* server = nullptr;
-    QTcpSocket* client1 = nullptr;
-    QTcpSocket* client2 = nullptr;
-    void send_to_another_client(QTcpSocket* another, NetworkData data);
-    void remove_client(QTcpSocket* client);
+    QSet<QTcpSocket *> clients;
+    NetworkServer *server = nullptr;
+    QTcpSocket *client1 = nullptr;
+    QTcpSocket *client2 = nullptr;
+
+    void send_to_another_client(QTcpSocket *another, NetworkData data);
+
+    void remove_client(QTcpSocket *client);
 
 private slots:
+
     void listen_port();
+
     void restart_server();
-    void receive_from_client(QTcpSocket* client, NetworkData data);
+
+    void receive_from_client(QTcpSocket *client, NetworkData data);
 };
 
 #endif // MAINWINDOW_H

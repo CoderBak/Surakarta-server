@@ -2,9 +2,8 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+        QMainWindow(parent),
+        ui(new Ui::MainWindow) {
     ui->setupUi(this);
 
     server = new NetworkServer(this); // 创建一个服务器对象，其父对象为当前窗口
@@ -28,19 +27,18 @@ void MainWindow::listen_port() {
     ui->PortEdit->setText("Listening...");
 }
 
-void MainWindow::remove_client(QTcpSocket* client) {
+void MainWindow::remove_client(QTcpSocket *client) {
     if (client == client1) {
         client1 = nullptr;
         ui->ShowClient1->setText("");
-    }
-    else if (client == client2) {
+    } else if (client == client2) {
         client2 = nullptr;
         ui->ShowClient2->setText("");
     }
     clients.remove(client);
 }
 
-void MainWindow::receive_from_client(QTcpSocket* client, NetworkData data) {
+void MainWindow::receive_from_client(QTcpSocket *client, NetworkData data) {
     // client 是发送消息的客户端，data 是消息内容
     // 以下代码首先处理客户端的连接和断开，然后处理从客户端收到的消息，显示在界面上并转发给另一个客户端
     // 你们在游戏里要做类似的事情，只不过处理不仅仅是显示，而是对应的游戏逻辑
@@ -63,17 +61,15 @@ void MainWindow::receive_from_client(QTcpSocket* client, NetworkData data) {
         this->ui->ShowClient1->setText(data.data2);
         if (client2 && data.op == OPCODE::CHAT_OP)
             send_to_another_client(client2, data);
-    }
-    else if (client == client2) {
+    } else if (client == client2) {
         this->ui->ShowClient2->setText(data.data2);
         if (client1 && data.op == OPCODE::CHAT_OP)
             send_to_another_client(client1, data);
-    }
-    else
+    } else
         QMessageBox::warning(this, "Warning", "Unknown client!");
 }
 
-void MainWindow::send_to_another_client(QTcpSocket* another, NetworkData data) {
+void MainWindow::send_to_another_client(QTcpSocket *another, NetworkData data) {
     // 发送消息给一个客户端，这个程序里实际上做的事情是转发消息
     this->server->send(another, data);
 }

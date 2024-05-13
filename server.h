@@ -42,19 +42,22 @@ private slots:
 
     void listenPort();
 
-    void receiveFromClient(QTcpSocket* client, NetworkData data);
+    void receiveFromClient(QTcpSocket *client, NetworkData data);
 
     void restartServer();
 
     //void resetTimerSlot();
 
 private:
-    int port=1233;
-    const int maxClients=2;
+    int port = 1233;
+    const int maxClients = 2;
     NetworkServer *server1;
-    void removeClient(QTcpSocket*client);
-    void sendToAnotherClient(QTcpSocket*another,NetworkData data);
-    QSet<QTcpSocket*> clients;
+
+    void removeClient(QTcpSocket *client);
+
+    void sendToAnotherClient(QTcpSocket *another, NetworkData data);
+
+    QSet<QTcpSocket *> clients;
 
     InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
 

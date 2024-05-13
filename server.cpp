@@ -5,7 +5,7 @@
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
-    totalTimer(new Timer(this)),resetTimer(new Timer(this)),timeOut(false){
+                                  totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false) {
 
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
@@ -142,7 +142,7 @@ bool Server::getData(QByteArray &data) {
 void Server::updateTimeSlot1(QString time) {
 
     // qDebug()<<time<<"server first time";
-    QTime startTime=QTime::fromString(time);
+    QTime startTime = QTime::fromString(time);
     // qDebug()<<startTime<<"starttime";
     startTime = startTime.addSecs(1);
     QString formattedTime = startTime.toString("hh:mm:ss");
@@ -157,7 +157,7 @@ void Server::updateTimeSlot1(QString time) {
 
 void Server::updateTimeSlot2(QString time) {
     // qDebug()<<time<<"server first time";
-    QTime startTime=QTime::fromString(time);
+    QTime startTime = QTime::fromString(time);
     // qDebug()<<startTime<<"starttime";
     startTime = startTime.addSecs(1);
     QString formattedTime = startTime.toString("hh:mm:ss");
@@ -170,28 +170,25 @@ void Server::updateTimeSlot2(QString time) {
     client2->write(message);
 }
 
-void Server::upDateTimeOut()
-{
-    if(resetTimer->getTime()>maxSecond)
-    {
-        QByteArray message1,message2;
+void Server::upDateTimeOut() {
+    if (resetTimer->getTime() > maxSecond) {
+        QByteArray message1, message2;
         message1.append("$ET");
         message2.append("$EF");
-        if(currentClient==client1){
+        if (currentClient == client1) {
             client1->write(message1);
             client2->write(message2);
-            game->gameInfo->winner=ReverseColor(currentPlayerColor);
-        }
-        else{
+            game->gameInfo->winner = ReverseColor(currentPlayerColor);
+        } else {
             client2->write(message1);
             client1->write(message2);
-            game->gameInfo->winner=ReverseColor(currentPlayerColor);
+            game->gameInfo->winner = ReverseColor(currentPlayerColor);
         }
         totalTimer->reset();
         resetTimer->reset();
         totalTimer->stop();
         resetTimer->stop();
-        qDebug()<<"Time out!";
+        qDebug() << "Time out!";
         // timeOut=true;
         auto clearBuffer = [](auto &client) {
             if (client->bytesAvailable() > 0) {
@@ -207,13 +204,11 @@ void Server::upDateTimeOut()
     }
 }
 
-void Server::listenPort()
-{
-    server1->listen(QHostAddress::Any,this->port);
+void Server::listenPort() {
+    server1->listen(QHostAddress::Any, this->port);
 }
 
-void Server::receiveFromClient(QTcpSocket* client, NetworkData data)
-{
+void Server::receiveFromClient(QTcpSocket *client, NetworkData data) {
     if (data.op == OPCODE::LEAVE_OP) {
         removeClient(client);
         return;
@@ -221,7 +216,7 @@ void Server::receiveFromClient(QTcpSocket* client, NetworkData data)
     if (!clients.contains(client)) {
         if (clients.size() >= maxClients) {
             //QMessageBox::warning(this, "Warning", "The server is full!");
-            qDebug()<<"Server is full!";
+            qDebug() << "Server is full!";
             return;
         }
         clients.insert(client);
@@ -234,41 +229,35 @@ void Server::receiveFromClient(QTcpSocket* client, NetworkData data)
     if (client == client1) {
         if (client2 && data.op == OPCODE::CHAT_OP)
             sendToAnotherClient(client2, data);
-    }
-    else if (client == client2) {
+    } else if (client == client2) {
         if (client1 && data.op == OPCODE::CHAT_OP)
-           sendToAnotherClient(client1, data);
-    }
-    else
+            sendToAnotherClient(client1, data);
+    } else
         //QMessageBox::warning(this, "Warning", "Unknown client!");
-        qDebug()<<"Unknown client!";
+        qDebug() << "Unknown client!";
 }
 
-void Server::restartServer()
-{
+void Server::restartServer() {
     server1->close();
     clients.clear();
-    client1=nullptr;
-    client2=nullptr;
-    disconnect(server1,&NetworkServer::receive,this,&Server::receiveFromClient);
+    client1 = nullptr;
+    client2 = nullptr;
+    disconnect(server1, &NetworkServer::receive, this, &Server::receiveFromClient);
     delete server1;
     server1 = new NetworkServer(this);
-    connect(server1,&NetworkServer::receive,this,&Server::receiveFromClient);
+    connect(server1, &NetworkServer::receive, this, &Server::receiveFromClient);
 }
 
-void Server::removeClient(QTcpSocket *client)
-{
+void Server::removeClient(QTcpSocket *client) {
     if (client == client1) {
         client1 = nullptr;
-    }
-    else if (client == client2) {
+    } else if (client == client2) {
         client2 = nullptr;
     }
     clients.remove(client);
 }
 
-void Server::sendToAnotherClient(QTcpSocket *another, NetworkData data)
-{
+void Server::sendToAnotherClient(QTcpSocket *another, NetworkData data) {
     this->server1->send(another, data);
 }
 
