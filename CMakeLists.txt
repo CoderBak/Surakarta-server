@@ -31,12 +31,19 @@ set(PROJECT_SOURCES
         surakarta/agent/agent_random.cpp
         surakarta/agent/agent_random.h
         timer.h
+        NetworkLibrary/networkdata.cpp
+        NetworkLibrary/networkdata.h
+        NetworkLibrary/networkserver.cpp
+        NetworkLibrary/networkserver.h
+        NetworkLibrary/networksocket.cpp
+        NetworkLibrary/networksocket.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Surakarta-server
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
+            mainwindow.h mainwindow.cpp mainwindow.ui
     )
     # Define target properties for Android with Qt 6 as:
     #    set_property(TARGET Surakarta-server APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
