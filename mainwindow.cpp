@@ -93,5 +93,4 @@ void MainWindow::restart_server() {
 
 MainWindow::~MainWindow() {
     delete ui;
-    delete server;
 }
