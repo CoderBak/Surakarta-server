@@ -368,6 +368,6 @@ void Server::socketDisconnected() {
 void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << "Board Updated!";
     qDebug() << boardInfo << "\n";
-    client1->write("$" + boardInfo.toUtf8());
-    client2->write("$" + boardInfo.toUtf8());
+    client1->write("$B" + boardInfo.toUtf8());
+    client2->write("$B" + boardInfo.toUtf8());
 }
