@@ -49,7 +49,7 @@ protected:
         while (m_running) {
 
             QString timeString = startTime.toString("hh:mm:ss");
-            qDebug() << startTime << " timer";
+            // qDebug() << startTime << " timer";
 
             emit updateTime(timeString);
             // if(isCheck)

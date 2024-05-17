@@ -2,6 +2,7 @@
 #include <iostream>
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
+#include "surakarta/agent/agent_random.h"
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
@@ -40,6 +41,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
+    isClient1AI = isClient2AI = false;
     retry = false;
     auto clearBuffer = [](auto &client) {
         if (client->bytesAvailable() > 0) {
@@ -59,29 +61,43 @@ void Server::startGame() {
         client1->write("$SW;");
         client2->write("$SB;");
     }
+    const auto agent =
+            std::make_shared<AgentRandom>(game->GetBoard(), game->GetGameInfo(), game->GetRuleManager());
     while (!game->IsEnd()) {
+        qDebug() << isClient1AI << isClient2AI;
         currentClient = (currentPlayer == 1) ? client1 : client2;
-        QEventLoop loop;
-        connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
-        while (true) {
-            loop.exec();
-            if (currentClient->bytesAvailable() > 0) {
-                QByteArray data = currentClient->read(currentClient->bytesAvailable());
-                if (!getData(data)) {
-                    break;
+        QTcpSocket *otherClient = (currentPlayer == 1) ? client2 : client1;
+        if (currentPlayer == 1 && isClient1AI || currentPlayer == 2 && isClient2AI) {
+            std::cerr << "Handled By AI" << std::endl;
+            auto move = agent->CalculateMove();
+            game->Move(move);
+        } else {
+            QEventLoop loop;
+            connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
+            while (true) {
+                loop.exec();
+                if (currentClient->bytesAvailable() > 0) {
+                    QByteArray data = currentClient->read(currentClient->bytesAvailable());
+                    if (!getData(data, false)) {
+                        break;
+                    }
+                    if (retry) {
+                        totalTimer->reset();
+                        resetTimer->reset();
+                        break;
+                    }
+                    // if(timeOut){
+                    //     break;
+                    // }
                 }
-                if (retry) {
-                    totalTimer->reset();
-                    resetTimer->reset();
-                    break;
-                }
-                // if(timeOut){
-                //     break;
-                // }
             }
         }
-        clearBuffer(client1);
-        clearBuffer(client2);
+        clearBuffer(currentClient);
+        if (otherClient->bytesAvailable() > 0) {
+            QByteArray data = otherClient->read(otherClient->bytesAvailable());
+            getData(data, true);
+        }
+        clearBuffer(otherClient);
         if (retry) {
             break;
         }
@@ -91,6 +107,8 @@ void Server::startGame() {
         // }
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerColor = ReverseColor(currentPlayerColor);
+        std::cerr << *game->GetGameInfo() << std::endl;
+        std::cerr << *game->GetBoard() << std::endl;
     }
     qDebug() << "GAME ENDS!";
     std::cerr << *game->GetBoard();
@@ -101,16 +119,16 @@ void Server::startGame() {
     }
 }
 
-bool Server::getData(QByteArray &data) {
+bool Server::getData(QByteArray &data, bool reversed) {
     bool hasMove = false;
     qDebug() << "Now is client" << currentPlayer;
-    qDebug() << "Received message from client: " << data;
+    //qDebug() << "Received message from client: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
         return true;
     }
     auto packetHandler = [&](auto packet) {
-        const auto info = dataHandler(packet, currentClient);
+        const auto info = dataHandler(packet, reversed);
         if (info == InfoType::RETRY) {
             retry = true;
         }
@@ -140,7 +158,6 @@ bool Server::getData(QByteArray &data) {
 }
 
 void Server::updateTimeSlot1(QString time) {
-
     // qDebug()<<time<<"server first time";
     QTime startTime = QTime::fromString(time);
     // qDebug()<<startTime<<"starttime";
@@ -220,10 +237,11 @@ void Server::receiveFromClient(QTcpSocket *client, NetworkData data) {
             return;
         }
         clients.insert(client);
-        if (!client1)
+        if (!client1) {
             client1 = client;
-        else if (!client2)
+        } else if (!client2) {
             client2 = client;
+        }
     }
 
     if (client == client1) {
@@ -274,9 +292,20 @@ std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data)
     return std::make_pair(Position(idx[0], idx[1]), Position(idx[2], idx[3]));
 }
 
-InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
+InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
     switch (info[0]) {
+        case 'A': {
+            if (reversed ^ (currentClient == client1)) {
+                isClient1AI = (info[1] == '1');
+            } else {
+                isClient2AI = (info[1] == '1');
+            }
+            return InfoType::DEFAULT;
+        }
         case 'M': {
+            if (reversed) {
+                return InfoType::DEFAULT;
+            }
             auto [from, to] = moveMessageHandler(info);
             auto currentMove = Move(from, to, currentPlayerColor);
             game->Move(currentMove);
@@ -285,6 +314,9 @@ InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
             return InfoType::MOVE;
         }
         case 'Q': {
+            if (reversed) {
+                return InfoType::DEFAULT;
+            }
             // If we want valid capture.
             if (info[1] == 'C') {
                 QByteArray dataCopy = info;
@@ -302,7 +334,7 @@ InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
                         data += QString("@%1;%2").arg(piece.y).arg(piece.x);
                     }
                 }
-                client->write(data.toUtf8());
+                currentClient->write(data.toUtf8());
             } else {
                 QByteArray dataCopy = info;
                 dataCopy.remove(0, 2);
@@ -316,12 +348,16 @@ InfoType Server::dataHandler(const QByteArray &info, QTcpSocket *client) {
                 for (const auto &elem: movable) {
                     data += QString("|%1;%2").arg(elem.y).arg(elem.x);
                 }
-                client->write(data.toUtf8());
+                currentClient->write(data.toUtf8());
             }
             return InfoType::DEFAULT;
         }
-        case 'G':
+        case 'G': {
+            if (reversed) {
+                return InfoType::DEFAULT;
+            }
             return InfoType::RETRY;
+        }
         default:
             return InfoType::DEFAULT;
     }

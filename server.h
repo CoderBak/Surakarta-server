@@ -32,7 +32,7 @@ private slots:
 
     void onBoardUpdated(const QString &boardInfo);
 
-    bool getData(QByteArray &data);
+    bool getData(QByteArray &data, bool reversed);
 
     void updateTimeSlot1(QString time);
 
@@ -59,7 +59,7 @@ private:
 
     QSet<QTcpSocket *> clients;
 
-    InfoType dataHandler(const QByteArray &info, QTcpSocket *client);
+    InfoType dataHandler(const QByteArray &info, bool reversed);
 
     QTcpSocket *client1, *client2, *currentClient;
 
@@ -76,6 +76,8 @@ private:
 
     Timer *totalTimer;
     Timer *resetTimer;
+
+    bool isClient1AI, isClient2AI;
 };
 
 #endif // SERVER_H

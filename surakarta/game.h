@@ -42,6 +42,8 @@ public:
 
     std::shared_ptr<GameInfo> GetGameInfo() const { return gameInfo; }
 
+    std::shared_ptr<RuleManager> GetRuleManager() const { return ruleManager; }
+
     bool IsEnd() const { return gameInfo->IsEnd(); }
 
     unsigned int boardSize;
