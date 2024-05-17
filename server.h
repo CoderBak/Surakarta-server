@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "NetworkLibrary/networkdata.h"
 #include "NetworkLibrary/networkserver.h"
+#include "utils/logger.h"
 
 class Server : public QTcpServer {
 Q_OBJECT
@@ -78,6 +79,8 @@ private:
     Timer *resetTimer;
 
     bool isClient1AI, isClient2AI;
+
+    std::shared_ptr<Logger> logger;
 };
 
 #endif // SERVER_H

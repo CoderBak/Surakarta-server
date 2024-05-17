@@ -6,8 +6,8 @@
 #include <QEventLoop>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
-                                  totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false) {
-
+                                  totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false),
+                                  logger(std::make_shared<Logger>()) {
     if (!listen(QHostAddress::Any, 1233)) {
         qDebug() << "Unable to listen at port 1233.";
         exit(-1);
@@ -52,6 +52,7 @@ void Server::startGame() {
     game = std::make_unique<Game>();
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
     game->StartGame();
+    QString currentTime = QDateTime::currentDateTime().toString("yy-MM-dd-hh-mm-ss");
     currentPlayer = (rand() % 2 + 2) % 2 + 1;
     currentPlayerColor = Player::BLACK;
     if (currentPlayer == 1) {
@@ -68,8 +69,11 @@ void Server::startGame() {
         currentClient = (currentPlayer == 1) ? client1 : client2;
         QTcpSocket *otherClient = (currentPlayer == 1) ? client2 : client1;
         if (currentPlayer == 1 && isClient1AI || currentPlayer == 2 && isClient2AI) {
-            std::cerr << "Handled By AI" << std::endl;
             auto move = agent->CalculateMove();
+            logger->addLog(QString("%1;%2->%3;%4 (%5)")
+                                   .arg(move.from.x).arg(move.from.y)
+                                   .arg(move.to.x).arg(move.to.y)
+                                   .arg(currentPlayer));
             game->Move(move);
         } else {
             QEventLoop loop;
@@ -114,6 +118,7 @@ void Server::startGame() {
     std::cerr << *game->GetBoard();
     std::cerr << game->GetGameInfo()->endReason << std::endl;
     std::cerr << game->GetGameInfo()->winner << std::endl;
+    logger->save(currentTime);
     if (retry) {
         startGame();
     }
@@ -308,6 +313,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             }
             auto [from, to] = moveMessageHandler(info);
             auto currentMove = Move(from, to, currentPlayerColor);
+            logger->addLog(QString("%1;%2->%3;%4 (%5)").arg(from.x).arg(from.y).arg(to.x).arg(to.y).arg(currentPlayer));
             game->Move(currentMove);
             std::cerr << *game->GetGameInfo() << std::endl;
             std::cerr << *game->GetBoard() << std::endl;

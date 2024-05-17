@@ -40,6 +40,7 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.cpp
         mainwindow.ui
+        utils/logger.h
 )
 
 if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
