@@ -7,6 +7,7 @@
 #include "NetworkLibrary/networkdata.h"
 #include "NetworkLibrary/networkserver.h"
 #include <QLineEdit>
+#include "boardUi.h"
 
 
 namespace Ui {
@@ -39,6 +40,7 @@ private:
     NetworkServer *server = nullptr;
     QTcpSocket *client1 = nullptr;
     QTcpSocket *client2 = nullptr;
+    boardUi *serverBoard;
 
     void send_to_another_client(QTcpSocket *another, NetworkData data);
 
