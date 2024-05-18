@@ -11,7 +11,6 @@
 #include "NetworkLibrary/networkdata.h"
 #include "NetworkLibrary/networkserver.h"
 #include "utils/logger.h"
-#include "boardUi.h"
 
 
 class Server : public QTcpServer {
@@ -21,6 +20,10 @@ public:
     explicit Server(QObject *parent = nullptr);
 
     void startGame();
+
+signals:
+
+    void boardUpdated(const QString &boardInfo);
 
 protected:
     void incomingConnection(qintptr socketDescriptor) override;
@@ -48,8 +51,6 @@ private slots:
     void receiveFromClient(QTcpSocket *client, NetworkData data);
 
     void restartServer();
-
-    void onChessChanged(ChessColor CC[BOARD_SIZE][BOARD_SIZE]);
 
     //void updateBoard();
 

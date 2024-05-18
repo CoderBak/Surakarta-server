@@ -5,7 +5,7 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     MainWindow w;
+    w.setServer(new Server());
     w.show();
-    Server server;
     return QApplication::exec();
 }

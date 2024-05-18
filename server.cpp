@@ -76,16 +76,6 @@ void Server::startGame() {
                                    .arg(move.to.x).arg(move.to.y)
                                    .arg(currentPlayer));
             game->Move(move);
-            // for (unsigned int i = 0; i < BOARD_SIZE; i++) {
-            //     for (unsigned int j = 0; j < BOARD_SIZE; j++) {
-            //         if ((*(game->board))[i][j]->GetColor()==PieceColor::BLACK){
-            //             chessColor0[i][j]=ChessColor::BLACK;
-            //         }
-            //         else{
-            //             chessColor0[i][j]=ChessColor::WHITE;
-            //         }
-            //     }
-            // }
         } else {
             QEventLoop loop;
             connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
@@ -423,4 +413,5 @@ void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << boardInfo << "\n";
     client1->write("$B" + boardInfo.toUtf8());
     client2->write("$B" + boardInfo.toUtf8());
+    emit boardUpdated(boardInfo);
 }

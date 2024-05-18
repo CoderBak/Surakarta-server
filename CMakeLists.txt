@@ -18,7 +18,7 @@ set(PROJECT_SOURCES
         server.h
         utils/global_random_generator.h
         common.h
-        boardUi.h
+        board_ui.h
         surakarta/basic.h
         surakarta/board.h
         surakarta/game.cpp

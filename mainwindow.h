@@ -7,7 +7,8 @@
 #include "NetworkLibrary/networkdata.h"
 #include "NetworkLibrary/networkserver.h"
 #include <QLineEdit>
-#include "boardUi.h"
+#include "board_ui.h"
+#include "server.h"
 
 
 namespace Ui {
@@ -32,6 +33,11 @@ public:
 
     ~MainWindow() override;
 
+    void setServer(Server* _server) {
+        server2 = _server;
+        serverBoard->connectWith(server2);
+    }
+
 private:
     int port = 1234;
     const int max_clients = 2;
@@ -40,7 +46,8 @@ private:
     NetworkServer *server = nullptr;
     QTcpSocket *client1 = nullptr;
     QTcpSocket *client2 = nullptr;
-    boardUi *serverBoard;
+    board_ui *serverBoard;
+    Server* server2;
 
     void send_to_another_client(QTcpSocket *another, NetworkData data);
 
