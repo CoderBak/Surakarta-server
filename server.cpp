@@ -118,7 +118,7 @@ void Server::startGame() {
     std::cerr << *game->GetBoard();
     std::cerr << game->GetGameInfo()->endReason << std::endl;
     std::cerr << game->GetGameInfo()->winner << std::endl;
-    logger->save(currentTime);
+    logger->save(currentTime, client1, client2);
     if (retry) {
         startGame();
     }

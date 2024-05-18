@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include <QString>
+#include <QTcpSocket>
 
 class Logger {
 public:
@@ -10,7 +11,7 @@ public:
         log += msg + "\n";
     }
 
-    void save(const QString& title) {
+    void save(const QString& title, QTcpSocket* client1, QTcpSocket* client2) {
         qDebug() << "Saving log";
         QFile file(title + ".log");
         if (file.open(QIODevice::WriteOnly)) {
@@ -18,6 +19,8 @@ public:
             stream << log;
             qDebug() << "Log saved";
         }
+        client1->write(("$L" + title + log).toUtf8());
+        client2->write(("$L" + title + log).toUtf8());
         log.clear();
     }
 
