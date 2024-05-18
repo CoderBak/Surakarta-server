@@ -227,64 +227,6 @@ void Server::upDateTimeOut() {
     }
 }
 
-void Server::listenPort() {
-    server1->listen(QHostAddress::Any, this->port);
-}
-
-void Server::receiveFromClient(QTcpSocket *client, NetworkData data) {
-    if (data.op == OPCODE::LEAVE_OP) {
-        removeClient(client);
-        return;
-    }
-    if (!clients.contains(client)) {
-        if (clients.size() >= maxClients) {
-            //QMessageBox::warning(this, "Warning", "The server is full!");
-            qDebug() << "Server is full!";
-            return;
-        }
-        clients.insert(client);
-        if (!client1) {
-            client1 = client;
-        } else if (!client2) {
-            client2 = client;
-        }
-    }
-
-    if (client == client1) {
-        if (client2 && data.op == OPCODE::CHAT_OP)
-            sendToAnotherClient(client2, data);
-    } else if (client == client2) {
-        if (client1 && data.op == OPCODE::CHAT_OP)
-            sendToAnotherClient(client1, data);
-    } else
-        //QMessageBox::warning(this, "Warning", "Unknown client!");
-        qDebug() << "Unknown client!";
-}
-
-void Server::restartServer() {
-    server1->close();
-    clients.clear();
-    client1 = nullptr;
-    client2 = nullptr;
-    disconnect(server1, &NetworkServer::receive, this, &Server::receiveFromClient);
-    delete server1;
-    server1 = new NetworkServer(this);
-    connect(server1, &NetworkServer::receive, this, &Server::receiveFromClient);
-}
-
-void Server::removeClient(QTcpSocket *client) {
-    if (client == client1) {
-        client1 = nullptr;
-    } else if (client == client2) {
-        client2 = nullptr;
-    }
-    clients.remove(client);
-}
-
-void Server::sendToAnotherClient(QTcpSocket *another, NetworkData data) {
-    this->server1->send(another, data);
-}
-
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray dataCopy = data;
@@ -372,8 +314,6 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
 
 void Server::socketDisconnected1() {
     if (client1) {
-        // totalTimer->stop();
-        // resetTimer->stop();
         qDebug() << "Game stopped because client 1 stopped";
     }
     socketDisconnected();
@@ -381,8 +321,6 @@ void Server::socketDisconnected1() {
 
 void Server::socketDisconnected2() {
     if (client2) {
-        // totalTimer->stop();
-        // resetTimer->stop();
         qDebug() << "Game stopped because client 2 stopped";
     }
     socketDisconnected();
@@ -401,11 +339,8 @@ void Server::socketDisconnected() {
     }
     totalTimer->stop();
     resetTimer->stop();
-    //totalTimer->deleteLater();
-    //totalTimer = nullptr;
-    //resetTimer->deleteLater();
-    //resetTimer = nullptr;
-
+    totalTimer->reset();
+    resetTimer->reset();
 }
 
 void Server::onBoardUpdated(const QString &boardInfo) {

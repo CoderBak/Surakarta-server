@@ -67,7 +67,6 @@ protected:
         }
     }
 
-
 private:
     QTime startTime = QTime(0, 0, 0);
     bool m_running;
