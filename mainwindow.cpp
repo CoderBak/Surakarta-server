@@ -1,10 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QPainter>
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
-        ui(new Ui::MainWindow) {
+        ui(new Ui::MainWindow),
+        serverBoard(new boardUi(this))
+    {
     ui->setupUi(this);
+   auto *layout = new QHBoxLayout;
+    layout->addWidget(serverBoard);
+   auto *centralWidget = new QWidget;
+   centralWidget->setLayout(layout);
+   //centralWidget->setFixedSize(WIDTH0, HEIGHT0);
+   setCentralWidget(centralWidget);
+
 
     server = new NetworkServer(this); // 创建一个服务器对象，其父对象为当前窗口
 
@@ -93,4 +103,74 @@ void MainWindow::restart_server() {
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+boardUi::boardUi(QWidget *parent) : QWidget(parent) {
+    this->installEventFilter(this);
+    setMouseTracking(true);
+    for (unsigned int i = 0; i < BOARD_SIZE; i += 1) {
+        for (unsigned int j = 0; j < BOARD_SIZE; j += 1) {
+            chessColor0[i][j] = NONE;
+        }
+    }
+    // connect(&settings, &Settings::settingsApplied, this, &QtBoard::receiveDataFromUser);
+}
+
+boardUi::~boardUi()
+{
+
+}
+
+void boardUi::paintEvent(QPaintEvent *) {
+    QPainter painter(this);
+    painter.fillRect(rect(), BACK_COLOR);
+
+    // no need for arc
+    // // Draw k = size / 2 layers of arc, centered at centerX, centerY.
+    painter.setPen(QPen(DEFAULT_COLOR, PEN_WIDTH0));
+    for (int i = 0; i < BOARD_SIZE; i += 1) {
+        for (int j = 0; j < BOARD_SIZE; j += 1) {
+            painter.save();
+            painter.drawRect(DELTA_X0 + i * cellSize0, DELTA_Y0 + j * cellSize0, cellSize0, cellSize0);
+            painter.restore();
+        }
+    }
+    // drawArcs(painter, DELTA_X, DELTA_Y, 0, BOARD_SIZE / 2);
+    // drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y, 270 * 16, BOARD_SIZE / 2);
+    // drawArcs(painter, DELTA_X, DELTA_Y + BOARD_HEIGHT, 90 * 16, BOARD_SIZE / 2);
+    // drawArcs(painter, DELTA_X + BOARD_HEIGHT, DELTA_Y + BOARD_HEIGHT, 180 * 16, BOARD_SIZE / 2);
+
+    auto emphasize = [&](const int col, const int row, auto color, auto line, auto size) {
+        const auto [centerX, centerY] = translateIdx1(col, row);
+        const QRect rect(centerX - chessRadius0, centerY - chessRadius0, 2 * chessRadius0, 2 * chessRadius0);
+        painter.setPen(QPen(color, size, line));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawEllipse(rect);
+    };
+
+    drawChess();
+}
+
+void boardUi::drawChess()
+{
+    QPainter painter(this);
+    for (unsigned int i = 0; i < BOARD_SIZE; i++) {
+        for (unsigned int j = 0; j < BOARD_SIZE; j++) {
+            if (chessColor0[i][j] != NONE) {
+                const auto currentColor = (chessColor0[i][j] == BLACK) ? Qt::black : Qt::white;
+                painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH0));
+                painter.setBrush(QBrush(currentColor, Qt::SolidPattern));
+                const auto [centerX, centerY] = translateIdx1(j, i);
+                const QRect rect(centerX - chessRadius0, centerY - chessRadius0, 2 * chessRadius0, 2 * chessRadius0);
+                painter.drawEllipse(rect);
+            }
+        }
+    }
+    if (extraX != -1 && extraY != -1) {
+        const auto currentColor = (current_player == BLACK) ? Qt::black : Qt::white;
+        painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH0));
+        painter.setBrush(QBrush(currentColor, Qt::SolidPattern));
+        const QRect rect(extraX - chessRadius0, extraY - chessRadius0, 2 * chessRadius0, 2 * chessRadius0);
+        painter.drawEllipse(rect);
+    }
 }
