@@ -30,5 +30,6 @@ Move AgentRandom::CalculateMove() {
             }
         }
     }
+    QThread::sleep(2);
     return rd_move;
 }

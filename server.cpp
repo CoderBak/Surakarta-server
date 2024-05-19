@@ -4,7 +4,7 @@
 #include "surakarta/game.h"
 #include "surakarta/agent/agent_random.h"
 #include <QEventLoop>
-
+#include <QtConcurrent/QtConcurrentRun>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
                                   totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false),
@@ -70,12 +70,28 @@ void Server::startGame() {
         currentClient = (currentPlayer == 1) ? client1 : client2;
         QTcpSocket *otherClient = (currentPlayer == 1) ? client2 : client1;
         if (currentPlayer == 1 && isClient1AI || currentPlayer == 2 && isClient2AI) {
-            auto move = agent->CalculateMove();
+            auto watcher=new QFutureWatcher<Move>();
+            connect(watcher,&QFutureWatcher<Move>::finished,[&](){
+            Move move=watcher->result();
+            qDebug()<<"Finished";
+            watcher->deleteLater();
+            });
+
+            QFuture<Move> future = QtConcurrent::run([agent]() {
+                return agent->CalculateMove();
+            });
+            watcher->setFuture(future);
+
+            //QThread::sleep(1);
+            auto move=watcher->result();
+
+            //auto move = agent->CalculateMove();
             logger->addLog(QString("%1;%2->%3;%4 (%5)")
                                    .arg(move.from.x).arg(move.from.y)
                                    .arg(move.to.x).arg(move.to.y)
                                    .arg(currentPlayer));
             game->Move(move);
+            resetTimer->reset();
         } else {
             QEventLoop loop;
             connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
@@ -225,6 +241,11 @@ void Server::upDateTimeOut() {
         std::cerr << game->GetGameInfo()->endReason << std::endl;
         std::cerr << game->GetGameInfo()->winner << std::endl;
     }
+}
+
+void Server::moveCalculated(const Move &move)
+{
+    qDebug() <<"Move Received!";
 }
 
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {

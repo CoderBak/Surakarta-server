@@ -44,6 +44,8 @@ private slots:
 
     void upDateTimeOut();
 
+    void moveCalculated(const Move&move);
+
     //void updateBoard();
 
 private:
