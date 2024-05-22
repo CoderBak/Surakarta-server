@@ -64,8 +64,8 @@ void Server::startGame() {
         client2->write("$SB;");
     }
     const auto agent =
-            std::make_shared<AgentRandom>(game->GetBoard(), game->GetGameInfo(), game->GetRuleManager());
-    while (!game->IsEnd()) {
+            std::make_shared<AgentRandom>(game->board, game->gameInfo, game->ruleManager);
+    while (!game->isEnd()) {
         qDebug() << isClient1AI << isClient2AI;
         currentClient = (currentPlayer == 1) ? client1 : client2;
         QTcpSocket *otherClient = (currentPlayer == 1) ? client2 : client1;
@@ -112,13 +112,8 @@ void Server::startGame() {
         // }
         currentPlayer = (currentPlayer == 1) ? 2 : 1;
         currentPlayerColor = ReverseColor(currentPlayerColor);
-        std::cerr << *game->GetGameInfo() << std::endl;
-        std::cerr << *game->GetBoard() << std::endl;
     }
     qDebug() << "GAME ENDS!";
-    std::cerr << *game->GetBoard();
-    std::cerr << game->GetGameInfo()->endReason << std::endl;
-    std::cerr << game->GetGameInfo()->winner << std::endl;
     logger->save(currentTime, client1, client2);
     if (retry) {
         startGame();
@@ -221,9 +216,6 @@ void Server::upDateTimeOut() {
         clearBuffer(client1);
         clearBuffer(client2);
         qDebug() << "GAME ENDS!";
-        std::cerr << *game->GetBoard();
-        std::cerr << game->GetGameInfo()->endReason << std::endl;
-        std::cerr << game->GetGameInfo()->winner << std::endl;
     }
 }
 
@@ -258,8 +250,6 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             auto currentMove = Move(from, to, currentPlayerColor);
             logger->addLog(QString("%1;%2->%3;%4 (%5)").arg(from.x).arg(from.y).arg(to.x).arg(to.y).arg(currentPlayer));
             game->Move(currentMove);
-            std::cerr << *game->GetGameInfo() << std::endl;
-            std::cerr << *game->GetBoard() << std::endl;
             return InfoType::MOVE;
         }
         case 'Q': {

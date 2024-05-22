@@ -1,9 +1,9 @@
+// In this file, we check the rules.
 #ifndef RULE_MANAGER_H
 #define RULE_MANAGER_H
 
 #pragma once
 
-#include <iostream>
 #include <memory>
 #include <vector>
 #include "basic.h"
@@ -14,10 +14,7 @@ public:
             boardSize(board->boardSize), board(std::const_pointer_cast<const Board>(board)),
             gameInfo(std::const_pointer_cast<const GameInfo>(gameInfo)) {}
 
-    // Judge whether a move is legal.
     virtual MoveReason JudgeMove(const Move &move);
-
-    // Judge whether the game is end.
     virtual std::pair<EndReason, Player> JudgeEnd(const MoveReason &reason);
 
     unsigned int boardSize;

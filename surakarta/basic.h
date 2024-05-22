@@ -1,3 +1,5 @@
+// In this file, we define basic concepts,
+// including Move, GameInfo.
 #ifndef BASIC_H
 #define BASIC_H
 
@@ -8,12 +10,12 @@
 #include "piece.h"
 #include "../common.h"
 
+using pair = std::pair<Position, std::vector<Position>>;
+
 class Move {
 public:
-    Move(const Position from, const Position to, const Player player) : from(from), to(to), player(player) {}
-
+    Move(const Position &from, const Position &to, const Player &player) : from(from), to(to), player(player) {}
     friend bool operator==(const Move &lhs, const Move &rhs) = default;
-
     friend bool operator!=(const Move &lhs, const Move &rhs) = default;
 
     Position from, to;
@@ -39,29 +41,6 @@ struct GameInfo {
         lastCapturedRound = 0;
         endReason = EndReason::NONE;
         winner = Player::NONE;
-    }
-
-    bool IsEnd() const { return endReason != EndReason::NONE; }
-
-    friend std::ostream &operator<<(std::ostream &os, const GameInfo &game_info) {
-        os << "currentPlayer: " << game_info.currentPlayer << std::endl;
-        os << "num_round: " << game_info.numRound << std::endl;
-        os << "last_captured_round: " << game_info.lastCapturedRound << std::endl;
-        os << "endReason: " << game_info.endReason << std::endl;
-        os << "winner: " << game_info.winner << std::endl;
-        os << "maxNoCaptureRound: " << game_info.maxNoCaptureRound << std::endl;
-        return os;
-    }
-
-    friend std::istream &operator>>(std::istream &is, GameInfo &game_info) {
-        std::string str;
-        is >> str >> game_info.currentPlayer;
-        is >> str >> game_info.numRound;
-        is >> str >> game_info.lastCapturedRound;
-        is >> str >> game_info.endReason;
-        is >> str >> game_info.winner;
-        is >> str >> game_info.maxNoCaptureRound;
-        return is;
     }
 };
 

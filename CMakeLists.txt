@@ -23,7 +23,6 @@ set(PROJECT_SOURCES
         surakarta/board.h
         surakarta/game.cpp
         surakarta/game.h
-        surakarta/reason.cpp
         surakarta/rule_manager.cpp
         surakarta/rule_manager.h
         surakarta/reason.h

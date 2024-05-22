@@ -1,3 +1,4 @@
+// In this file, we define the algorithm of agent_random.
 #ifndef AGENT_RANDOM_H
 #define AGENT_RANDOM_H
 
@@ -7,7 +8,6 @@
 class AgentRandom : public AgentBase {
 public:
     using AgentBase::AgentBase;
-
     Move CalculateMove() override;
 };
 

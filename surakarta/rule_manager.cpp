@@ -1,5 +1,4 @@
 #include "rule_manager.h"
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -85,7 +84,7 @@ MoveReason RuleManager::JudgeMove(const Move &move) {
         return MoveReason::NOT_PLAYER_TURN;
     }
     // check if the pos is valid -> OUT_OF_BOARD
-    auto check_pos_valid = [=](auto &pos) {
+    auto check_pos_valid = [this](auto &pos) {
         return 0 <= pos.x && pos.x < boardSize && 0 <= pos.y && pos.y < boardSize;
     };
     if (!check_pos_valid(from) || !check_pos_valid(to)) {

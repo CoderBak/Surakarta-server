@@ -45,8 +45,8 @@ public:
             return std::make_pair(_DELTA_X + x * _cellSize + _cellSize / 2, _DELTA_Y + y * _cellSize + _cellSize / 2);
         };
         QPainter painter(this);
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
+        for (int i = 0; i < BOARD_SIZE; i += 1) {
+            for (int j = 0; j < BOARD_SIZE; j += 1) {
                 if (_board[i][j] != NONE) {
                     const auto currentColor = (_board[i][j] == BLACK) ? Qt::black : Qt::white;
                     painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));

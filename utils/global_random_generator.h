@@ -1,7 +1,4 @@
-/**
- * In this file, we provide the functionality of generating random number.
- */
-
+// In this file, we provide the functionality of generating random number.
 #ifndef GLOBAL_RANDOM_GENERATOR_H
 #define GLOBAL_RANDOM_GENERATOR_H
 

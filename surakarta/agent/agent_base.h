@@ -1,14 +1,10 @@
-//
-// Created by CoderBak on 2024/4/5.
-//
-
+// In this file, we define the base class for all the agents.
 #ifndef AGENT_BASE_H
 #define AGENT_BASE_H
 
 #pragma once
 
 #include <memory>
-#include <QDebug>
 #include "../basic.h"
 #include "../rule_manager.h"
 
@@ -22,7 +18,6 @@ public:
     virtual Move CalculateMove() {
         return Move{Position(0, 0), Position(0, 0), Player::NONE};
     }
-
 
 protected:
     unsigned int boardSize;

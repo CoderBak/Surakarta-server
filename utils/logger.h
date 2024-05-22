@@ -1,3 +1,4 @@
+// In this file, we handle logger for server.
 #ifndef LOGGER_H
 #define LOGGER_H
 
@@ -11,9 +12,6 @@ public:
     }
 
     void save(const QString& title, QTcpSocket* client1, QTcpSocket* client2) {
-        qDebug() << "Log title: " << title;
-        qDebug() << "Log content: " << log;
-        qDebug() << "Saving log";
         QDir dir;
         if (!dir.exists("./log")) {
             dir.mkpath("./log");

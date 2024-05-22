@@ -1,35 +1,19 @@
 #include "game.h"
-#include <fstream>
-#include <iostream>
 
-void Game::StartGame(const std::string &file_name) {
-    if (file_name.empty()) {
-        for (unsigned int y = 0; y < boardSize; y++) {
-            for (unsigned int x = 0; x < boardSize; x++) {
-                if (y < 2) {
-                    (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::BLACK);
-                } else if (y >= boardSize - 2) {
-                    (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::WHITE);
-                } else {
-                    (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::NONE);
-                }
+void Game::StartGame() {
+    for (unsigned int y = 0; y < boardSize; y += 1) {
+        for (unsigned int x = 0; x < boardSize; x += 1) {
+            if (y < 2) {
+                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::BLACK);
+            } else if (y >= boardSize - 2) {
+                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::WHITE);
+            } else {
+                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::NONE);
             }
         }
-        gameInfo->reset();
-    } else {
-        std::ifstream fin(file_name);
-        fin >> (*board);
-        fin >> (*gameInfo);
-        fin.close();
     }
+    gameInfo->reset();
     updateBoard();
-}
-
-void Game::SaveGame(const std::string &file_name) const {
-    std::ofstream fout(file_name);
-    fout << (*board);
-    fout << (*gameInfo);
-    fout.close();
 }
 
 void Game::UpdateGameInfo(MoveReason moveReason, EndReason endReason, Player winner) const {
@@ -46,7 +30,6 @@ void Game::UpdateGameInfo(MoveReason moveReason, EndReason endReason, Player win
 }
 
 MoveResponse Game::Move(const class Move &move) {
-    std::cerr << move.player << " " << move.from << " " << move.to << std::endl;
     MoveReason moveReason = ruleManager->JudgeMove(move);
     auto [endReason, winner] = ruleManager->JudgeEnd(moveReason);
     UpdateGameInfo(moveReason, endReason, winner);
@@ -62,17 +45,13 @@ MoveResponse Game::Move(const class Move &move) {
                 std::make_shared<Piece>(move.from.x, move.from.y, PieceColor::NONE);
         updateBoard();
     }
-    MoveResponse response(moveReason, endReason, winner);
+    MoveResponse response(endReason, winner);
     return response;
 }
 
 // Checks if the coordinates are in the boundary.
 bool checkBound(const int x, const int y, const int boundMin, const int boundMax) {
     return boundMin <= x && x < boundMax && boundMin <= y && y < boundMax;
-}
-
-bool checkBound(const Position &pos, const int boundMin, const int boundMax) {
-    return checkBound(static_cast<int>(pos.x), static_cast<int>(pos.y), boundMin, boundMax);
 }
 
 // Get the next position and direction of a move.
@@ -97,11 +76,6 @@ std::pair<Position, Direction> getNextPos(const Position from, const Direction d
         return (2 * y < n) ? gen(idx, 0, Direction::SOUTH) : gen(n - 1 - idx, n - 1, Direction::NORTH);
     }
     return (2 * x < n) ? gen(0, idx, Direction::EAST) : gen(n - 1, n - 1 - idx, Direction::WEST);
-}
-
-// Reverse the color
-PieceColor reverse(const PieceColor item) {
-    return item == PieceColor::BLACK ? PieceColor::WHITE : PieceColor::BLACK;
 }
 
 // Find all eatable places and their path.

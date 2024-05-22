@@ -1,9 +1,8 @@
+// In this file, we define MoveReason and EndReason.
 #ifndef REASON_H
 #define REASON_H
 
 #pragma once
-
-#include <iostream>
 
 enum class MoveReason {
     LEGAL, // unused
@@ -30,17 +29,8 @@ enum class EndReason {
     ILLEGAL_MOVE, // one player makes an illegal move
 };
 
-bool IsLegalMoveReason(MoveReason reason);
-
-bool IsEndReason(EndReason reason);
-
-std::ostream &operator<<(std::ostream &os, const MoveReason &reason);
-
-std::istream &operator>>(std::istream &is, MoveReason &reason);
-
-std::ostream &operator<<(std::ostream &os, const EndReason &reason);
-
-std::istream &operator>>(std::istream &is, EndReason &reason);
-
+inline bool IsEndReason(EndReason reason) {
+    return reason != EndReason::NONE;
+}
 
 #endif //REASON_H
