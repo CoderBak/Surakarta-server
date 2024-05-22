@@ -23,7 +23,7 @@ public:
             for (unsigned int x = 0; x < board.boardSize; x += 1) {
                 os << (*board[x][y]) << " ";
             }
-            os << std::endl;
+            os << "|";
         }
         return os;
     }

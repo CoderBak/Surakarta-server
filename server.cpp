@@ -338,5 +338,6 @@ void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << boardInfo << "\n";
     client1->write("$B" + boardInfo.toUtf8());
     client2->write("$B" + boardInfo.toUtf8());
+    logger->addLog("B" + boardInfo);
     emit boardUpdated(boardInfo);
 }

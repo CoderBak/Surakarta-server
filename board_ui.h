@@ -75,7 +75,7 @@ private:
 private slots:
 
     void updateBoard(const QString &boardInfo) {
-        QStringList rows = boardInfo.split('\n');
+        QStringList rows = boardInfo.split('|');
         for (int row = 0; row < BOARD_SIZE; row += 1) {
             QString rowString = rows.value(row).trimmed();
             rowString.remove(' ');
