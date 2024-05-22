@@ -11,7 +11,7 @@
 constexpr int sub_WIDTH = 378;
 constexpr int sub_HEIGHT = 400;
 constexpr int sub_BOARD_HEIGHT = 300;
-constexpr int sub_DELTA_Y = 0;
+constexpr int sub_DELTA_Y = 39;
 constexpr int sub_DELTA_X = 28;
 constexpr int sub_cellSize = sub_BOARD_HEIGHT / BOARD_SIZE;
 constexpr int sub_PEN_WIDTH = 2;
