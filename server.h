@@ -38,9 +38,9 @@ private slots:
 
     bool getData(QByteArray &data, bool reversed);
 
-    void updateTimeSlot1(QString time);
+    void updateTimeSlot1(const QString& time);
 
-    void updateTimeSlot2(QString time);
+    void updateTimeSlot2(const QString& time);
 
     void upDateTimeOut();
 

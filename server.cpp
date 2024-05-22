@@ -1,10 +1,9 @@
 #include "server.h"
-#include <iostream>
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
 #include "surakarta/agent/agent_random.h"
 #include <QEventLoop>
-
+#include <random>
 
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
                                   totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false),
@@ -36,7 +35,6 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         connect(totalTimer, &Timer::timeOut, this, &Server::upDateTimeOut);
         totalTimer->start();
         resetTimer->start();
-        // connect(resetTimer, &Timer::timeReset, this, &Server::resetTimerSlot);
         startGame();
     }
 }
@@ -54,7 +52,11 @@ void Server::startGame() {
     connect(game.get(), &Game::boardUpdated, this, &Server::onBoardUpdated);
     game->StartGame();
     QString currentTime = QDateTime::currentDateTime().toString("yy-MM-dd-hh-mm-ss");
-    currentPlayer = (rand() % 2 + 2) % 2 + 1;
+    // Generate random number.
+    std::random_device dev;
+    std::mt19937 engine(dev());
+    std::uniform_int_distribution<int> distribution(1, 2);
+    currentPlayer = distribution(engine);
     currentPlayerColor = Player::BLACK;
     if (currentPlayer == 1) {
         client1->write("$SB;"); // Side: B
@@ -123,7 +125,6 @@ void Server::startGame() {
 bool Server::getData(QByteArray &data, bool reversed) {
     bool hasMove = false;
     qDebug() << "Now is client" << currentPlayer;
-    //qDebug() << "Received message from client: " << data;
     if (data[0] != '$') {
         qDebug() << "Wrong format!";
         return true;
@@ -158,10 +159,8 @@ bool Server::getData(QByteArray &data, bool reversed) {
     return true;
 }
 
-void Server::updateTimeSlot1(QString time) {
-    // qDebug()<<time<<"server first time";
+void Server::updateTimeSlot1(const QString &time) {
     QTime startTime = QTime::fromString(time);
-    // qDebug()<<startTime<<"starttime";
     startTime = startTime.addSecs(1);
     QString formattedTime = startTime.toString("hh:mm:ss");
     QByteArray timeData = formattedTime.toUtf8();
@@ -173,7 +172,7 @@ void Server::updateTimeSlot1(QString time) {
     client2->write(message);
 }
 
-void Server::updateTimeSlot2(QString time) {
+void Server::updateTimeSlot2(const QString &time) {
     // qDebug()<<time<<"server first time";
     QTime startTime = QTime::fromString(time);
     // qDebug()<<startTime<<"starttime";
