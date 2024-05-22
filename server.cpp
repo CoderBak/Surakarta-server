@@ -40,6 +40,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 }
 
 void Server::startGame() {
+    logger->addLog(QString::number(BOARD_SIZE));
     isClient1AI = isClient2AI = false;
     retry = false;
     auto clearBuffer = [](auto &client) {
