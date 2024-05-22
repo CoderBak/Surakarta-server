@@ -10,10 +10,11 @@
     <height>378</height>
    </rect>
   </property>
+  <property name="windowTitle">
+   <string>Surakarta server</string>
+  </property>
   <widget class="QWidget" name="centralWidget"/>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
 </ui>

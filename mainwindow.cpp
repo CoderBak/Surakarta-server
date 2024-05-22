@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
         ui(new Ui::MainWindow),
         serverBoard(new board_ui(this)) {
     ui->setupUi(this);
-    auto *layout = new QVBoxLayout;
+    auto *layout = new QHBoxLayout;
     layout->addWidget(serverBoard);
     centralWidget()->setLayout(layout);
     centralWidget()->setFixedSize(sub_WIDTH, sub_HEIGHT);

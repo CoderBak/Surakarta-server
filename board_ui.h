@@ -9,9 +9,9 @@
 #include "server.h"
 
 constexpr int sub_WIDTH = 378;
-constexpr int sub_HEIGHT = 500;
+constexpr int sub_HEIGHT = 400;
 constexpr int sub_BOARD_HEIGHT = 300;
-constexpr int sub_DELTA_Y = 220;
+constexpr int sub_DELTA_Y = 0;
 constexpr int sub_DELTA_X = 28;
 constexpr int sub_cellSize = sub_BOARD_HEIGHT / BOARD_SIZE;
 constexpr int sub_PEN_WIDTH = 2;
@@ -31,12 +31,13 @@ public:
 
     void paintEvent(QPaintEvent *) override {
         QPainter painter(this);
+        painter.translate(0, -181);
         painter.setPen(QPen(DEFAULT_COLOR, sub_PEN_WIDTH));
         for (int i = 0; i < BOARD_SIZE; i += 1) {
             for (int j = 0; j < BOARD_SIZE; j += 1) {
                 painter.save();
-                painter.drawRect(sub_DELTA_X + i * sub_cellSize, DELTA_Y + j * sub_cellSize, sub_cellSize,
-                                 sub_cellSize);
+                painter.drawRect(sub_DELTA_X + i * sub_cellSize, DELTA_Y + j * sub_cellSize,
+                                 sub_cellSize, sub_cellSize);
                 painter.restore();
             }
         }
