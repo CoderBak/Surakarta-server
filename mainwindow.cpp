@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     auto *layout = new QVBoxLayout;
     layout->addWidget(serverBoard);
     centralWidget()->setLayout(layout);
-    centralWidget()->setFixedSize(_WIDTH, _HEIGHT);
-    this->setFixedSize(_WIDTH, _HEIGHT);
+    centralWidget()->setFixedSize(sub_WIDTH, sub_HEIGHT);
+    this->setFixedSize(sub_WIDTH, sub_HEIGHT);
 }
 
 MainWindow::~MainWindow() {

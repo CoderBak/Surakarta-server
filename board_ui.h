@@ -1,19 +1,21 @@
+// In this file, we draw the board ui for server.
 #ifndef BOARD_UI_H
 #define BOARD_UI_H
 
 #include <QWidget>
 #include <QHostAddress>
+#include <QPainter>
 #include "common.h"
 #include "server.h"
 
-constexpr int _WIDTH = 378;
-constexpr int _HEIGHT = 640;
-constexpr int _BOARD_HEIGHT = 300;
-constexpr int _DELTA_Y = 220;
-constexpr int _DELTA_X = 28;
-constexpr int _cellSize = _BOARD_HEIGHT / BOARD_SIZE;
-constexpr int _PEN_WIDTH = 2;
-constexpr int _chessRadius = static_cast<int>(0.35 * _cellSize);
+constexpr int sub_WIDTH = 378;
+constexpr int sub_HEIGHT = 500;
+constexpr int sub_BOARD_HEIGHT = 300;
+constexpr int sub_DELTA_Y = 220;
+constexpr int sub_DELTA_X = 28;
+constexpr int sub_cellSize = sub_BOARD_HEIGHT / BOARD_SIZE;
+constexpr int sub_PEN_WIDTH = 2;
+constexpr int sub_chessRadius = static_cast<int>(0.35 * sub_cellSize);
 
 class board_ui : public QWidget {
 Q_OBJECT
@@ -29,11 +31,12 @@ public:
 
     void paintEvent(QPaintEvent *) override {
         QPainter painter(this);
-        painter.setPen(QPen(DEFAULT_COLOR, _PEN_WIDTH));
+        painter.setPen(QPen(DEFAULT_COLOR, sub_PEN_WIDTH));
         for (int i = 0; i < BOARD_SIZE; i += 1) {
             for (int j = 0; j < BOARD_SIZE; j += 1) {
                 painter.save();
-                painter.drawRect(_DELTA_X + i * _cellSize, DELTA_Y + j * _cellSize, _cellSize, _cellSize);
+                painter.drawRect(sub_DELTA_X + i * sub_cellSize, DELTA_Y + j * sub_cellSize, sub_cellSize,
+                                 sub_cellSize);
                 painter.restore();
             }
         }
@@ -42,7 +45,8 @@ public:
 
     void drawChess() {
         auto translateIdx = [=](auto x, auto y) {
-            return std::make_pair(_DELTA_X + x * _cellSize + _cellSize / 2, _DELTA_Y + y * _cellSize + _cellSize / 2);
+            return std::make_pair(sub_DELTA_X + x * sub_cellSize + sub_cellSize / 2,
+                                  sub_DELTA_Y + y * sub_cellSize + sub_cellSize / 2);
         };
         QPainter painter(this);
         for (int i = 0; i < BOARD_SIZE; i += 1) {
@@ -52,8 +56,8 @@ public:
                     painter.setPen(QPen(CHESS_BORDER, PEN_WIDTH));
                     painter.setBrush(QBrush(currentColor, Qt::SolidPattern));
                     const auto [centerX, centerY] = translateIdx(j, i);
-                    const QRect rect(centerX - _chessRadius, centerY - _chessRadius, 2 * _chessRadius,
-                                     2 * _chessRadius);
+                    const QRect rect(centerX - sub_chessRadius, centerY - sub_chessRadius,
+                                     2 * sub_chessRadius, 2 * sub_chessRadius);
                     painter.drawEllipse(rect);
                 }
             }
@@ -65,7 +69,7 @@ public:
     }
 
 private:
-    ChessColor _board[BOARD_SIZE][BOARD_SIZE];
+    ChessColor _board[BOARD_SIZE][BOARD_SIZE]{};
 
 private slots:
 
@@ -78,7 +82,6 @@ private slots:
             for (int col = 0; col < BOARD_SIZE; col += 1) {
                 QChar pieceChar;
                 stream >> pieceChar;
-                // qDebug() << pieceChar;
                 switch (pieceChar.toLatin1()) {
                     case 'B':
                         _board[row][col] = BLACK;

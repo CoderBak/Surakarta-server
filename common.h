@@ -3,7 +3,6 @@
  */
 #pragma once
 
-#include <QtWidgets>
 #include "../Surakarta-client/board_utils.h"
 
 enum class InfoType {

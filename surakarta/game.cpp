@@ -4,11 +4,11 @@ void Game::StartGame() {
     for (unsigned int y = 0; y < boardSize; y += 1) {
         for (unsigned int x = 0; x < boardSize; x += 1) {
             if (y < 2) {
-                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::BLACK);
+                (*board)[x][y] = std::make_shared<Piece>(PieceColor::BLACK);
             } else if (y >= boardSize - 2) {
-                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::WHITE);
+                (*board)[x][y] = std::make_shared<Piece>(PieceColor::WHITE);
             } else {
-                (*board)[x][y] = std::make_shared<Piece>(x, y, PieceColor::NONE);
+                (*board)[x][y] = std::make_shared<Piece>(PieceColor::NONE);
             }
         }
     }
@@ -35,14 +35,10 @@ MoveResponse Game::Move(const class Move &move) {
     UpdateGameInfo(moveReason, endReason, winner);
     if (moveReason == MoveReason::LEGAL_NON_CAPTURE_MOVE) {
         std::swap((*board)[move.to.x][move.to.y], (*board)[move.from.x][move.from.y]);
-        (*board)[move.to.x][move.to.y]->SetPosition(move.to);
-        (*board)[move.from.x][move.from.y]->SetPosition(move.from);
         updateBoard();
     } else if (moveReason == MoveReason::LEGAL_CAPTURE_MOVE) {
         (*board)[move.to.x][move.to.y] = (*board)[move.from.x][move.from.y];
-        (*board)[move.to.x][move.to.y]->SetPosition(move.to);
-        (*board)[move.from.x][move.from.y] =
-                std::make_shared<Piece>(move.from.x, move.from.y, PieceColor::NONE);
+        (*board)[move.from.x][move.from.y] = std::make_shared<Piece>(PieceColor::NONE);
         updateBoard();
     }
     MoveResponse response(endReason, winner);

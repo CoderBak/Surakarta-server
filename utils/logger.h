@@ -4,6 +4,8 @@
 
 #include <QString>
 #include <QTcpSocket>
+#include <QDir>
+#include <QFile>
 
 class Logger {
 public:
@@ -21,6 +23,8 @@ public:
             QTextStream stream(&file);
             stream << log;
             qDebug() << "Log saved";
+        } else {
+            qDebug() << "Failed to save logs";
         }
         client1->write(("$L" + title + log).toUtf8());
         client2->write(("$L" + title + log).toUtf8());
