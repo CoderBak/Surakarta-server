@@ -1,9 +1,7 @@
-/**
- * In this file, we define the constants in backend, and basic classes.
- */
+// In this file, we define const.
 #pragma once
 
-#include "../Surakarta-client/board_utils.h"
+#include "../Surakarta-client/common.h"
 
 enum class InfoType {
     MOVE,
