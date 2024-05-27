@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <sstream>
 #include "basic.h"
 #include "rule_manager.h"
 
