@@ -1,3 +1,4 @@
+//In this file, we set the layout of board_ui in server
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QPainter>
