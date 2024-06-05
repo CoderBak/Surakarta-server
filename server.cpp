@@ -111,7 +111,6 @@ void Server::startGame() {
             }
         }
         clearBuffer(currentClient);
-
         // Handle data from the other client if available.
         if (otherClient->bytesAvailable() > 0) {
             QByteArray data = otherClient->read(otherClient->bytesAvailable());
