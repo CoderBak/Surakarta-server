@@ -28,8 +28,8 @@ set(PROJECT_SOURCES
         surakarta/reason.h
         surakarta/agent/agent_base.h
         surakarta/piece.h
-        surakarta/agent/agent_random.cpp
-        surakarta/agent/agent_random.h
+        surakarta/agent/agent_ai.cpp
+        surakarta/agent/agent_ai.h
         timer.h
         mainwindow.h
         mainwindow.cpp

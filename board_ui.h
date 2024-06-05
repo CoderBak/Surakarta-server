@@ -7,6 +7,7 @@
 #include <QPainter>
 #include "common.h"
 #include "server.h"
+
 // Constants for board UI dimensions and drawing settings.
 constexpr int sub_WIDTH = 378;
 constexpr int sub_HEIGHT = 400;
@@ -21,7 +22,7 @@ class board_ui : public QWidget {
 Q_OBJECT
 
 public:
-     // Constructor initializes the board to an empty state.
+    // Constructor initializes the board to an empty state.
     explicit board_ui(QWidget *parent) {
         for (int i = 0; i < BOARD_SIZE; i += 1) {
             for (int j = 0; j < BOARD_SIZE; j += 1) {
@@ -29,7 +30,8 @@ public:
             }
         }
     }
-   // Paint event handler to draw the board grid and pieces.
+
+    // Paint event handler to draw the board grid and pieces.
     void paintEvent(QPaintEvent *) override {
         QPainter painter(this);
         painter.translate(0, -181);
@@ -44,7 +46,8 @@ public:
         }
         drawChess();
     }
-// Draw the chess pieces on the board_ui in server
+
+    // Draw the chess pieces on the board_ui in server
     void drawChess() {
         auto translateIdx = [=](auto x, auto y) {
             return std::make_pair(sub_DELTA_X + x * sub_cellSize + sub_cellSize / 2,
@@ -71,7 +74,7 @@ public:
     }
 
 private:
-    ChessColor _board[BOARD_SIZE][BOARD_SIZE]{};
+    ChessColor _board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]{};
 
 private slots:
 // Slot to handle board updates from the server.

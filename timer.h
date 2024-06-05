@@ -28,7 +28,7 @@ signals:
     void timeOut();
 
 protected:
-    // The main function of the thread which runs in a loop while the timer is running.// The main function of the thread which runs in a loop while the timer is running.
+    // The main function of the thread which runs in a loop while the timer is running.
     void run() override {
         while (m_running) {
             QString timeString = startTime.toString("hh:mm:ss");

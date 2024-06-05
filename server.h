@@ -1,4 +1,4 @@
-// This file defines the Server class, which manages network connections and game state for a Surakarta game.
+// This file defines the Server class, which manages network connections and game state.
 #ifndef SERVER_H
 #define SERVER_H
 

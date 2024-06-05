@@ -2,20 +2,22 @@
 #include "server.h"
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
-#include "surakarta/agent/agent_random.h"
+#include "surakarta/agent/agent_ai.h"
 #include <QEventLoop>
 #include <random>
-// Server constructor: Initializes the server and sets up listening on port 1233.
+
+// Server constructor: Initializes the server and sets up listening on port.
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
                                   totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false),
                                   logger(std::make_shared<Logger>()) {
-    if (!listen(QHostAddress::Any, 1233)) {
-        qDebug() << "Unable to listen at port 1233.";
+    if (!listen(QHostAddress::Any, PORT)) {
+        qDebug() << "Unable to listen at port.";
         exit(-1);
     } else {
         qDebug() << "Server established!";
     }
 }
+
 // Called when a new connection is incoming.
 void Server::incomingConnection(qintptr socketDescriptor) {
     // Try to connect to 2 clients.
@@ -31,7 +33,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         qDebug() << "Client 2 connected.";
         qDebug() << "2 players ready, start the game now!\n";
 
-         // Connect timers and start them
+        // Connect timers and start them
         connect(totalTimer, &Timer::updateTime, this, &Server::updateTimeSlot1);
         connect(resetTimer, &Timer::updateTime, this, &Server::updateTimeSlot2);
         connect(resetTimer, &Timer::timeOut, this, &Server::upDateTimeOut);
@@ -41,6 +43,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         startGame();
     }
 }
+
 // Starts the game setup and main game loop.
 void Server::startGame() {
     logger->addLog(QString::number(BOARD_SIZE));
@@ -72,7 +75,7 @@ void Server::startGame() {
         client2->write("$SB;");
     }
     const auto agent =
-            std::make_shared<AgentRandom>(game->board, game->gameInfo, game->ruleManager);
+            std::make_shared<AgentAI>(game->board, game->gameInfo, game->ruleManager);
     while (!game->isEnd()) {
         qDebug() << isClient1AI << isClient2AI;
         currentClient = (currentPlayer == 1) ? client1 : client2;
@@ -109,7 +112,7 @@ void Server::startGame() {
         }
         clearBuffer(currentClient);
 
-          // Handle data from the other client if available.
+        // Handle data from the other client if available.
         if (otherClient->bytesAvailable() > 0) {
             QByteArray data = otherClient->read(otherClient->bytesAvailable());
             getData(data, true);
@@ -131,6 +134,7 @@ void Server::startGame() {
         startGame();
     }
 }
+
 // Processes incoming data from clients.
 bool Server::getData(QByteArray &data, bool reversed) {
     bool hasMove = false;
@@ -168,6 +172,7 @@ bool Server::getData(QByteArray &data, bool reversed) {
     }
     return true;
 }
+
 // Updates time for client
 void Server::updateTimeSlot1(const QString &time) {
     QTime startTime = QTime::fromString(time);
@@ -177,22 +182,18 @@ void Server::updateTimeSlot1(const QString &time) {
     QByteArray message;
     message.append("$TIME:T");
     message.append(timeData);
-    // qDebug()<<message;
     client1->write(message);
     client2->write(message);
 }
 
 void Server::updateTimeSlot2(const QString &time) {
-    // qDebug()<<time<<"server first time";
     QTime startTime = QTime::fromString(time);
-    // qDebug()<<startTime<<"starttime";
     startTime = startTime.addSecs(1);
     QString formattedTime = startTime.toString("hh:mm:ss");
     QByteArray timeData = formattedTime.toUtf8();
     QByteArray message;
     message.append("$TIME:R");
     message.append(timeData);
-    // qDebug()<<message;
     client1->write(message);
     client2->write(message);
 }
@@ -233,7 +234,6 @@ void Server::upDateTimeOut() {
     }
 }
 
-
 // Handles move message data.
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
     // When perform move, the info format is : M4;5;3;4
@@ -252,7 +252,7 @@ std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data)
 InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
     switch (info[0]) {
         case 'A': {
-        // AI setting
+            // AI setting
             if (reversed ^ (currentClient == client1)) {
                 isClient1AI = (info[1] == '1');
             } else {
@@ -261,7 +261,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
         }
         case 'M': {
-         // Move command
+            // Move command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -272,7 +272,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::MOVE;
         }
         case 'Q': {
-        // Query command
+            // Query command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -313,7 +313,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
         }
         case 'G': {
-         // Retry command
+            // Retry command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -323,6 +323,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
     }
 }
+
 // Slot function to handle disconnection of client 1.
 void Server::socketDisconnected1() {
     if (client1) {
@@ -338,6 +339,7 @@ void Server::socketDisconnected2() {
     }
     socketDisconnected();
 }
+
 // Handles cleanup and state reset when any client disconnects
 void Server::socketDisconnected() {
     if (client1) {
@@ -355,6 +357,7 @@ void Server::socketDisconnected() {
     totalTimer->reset();
     resetTimer->reset();
 }
+
 // Slot function to handle board updates. Send boardInfo to client
 void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << "Board Updated!";
