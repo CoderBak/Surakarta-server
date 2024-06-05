@@ -1,10 +1,11 @@
+//In this file, we finish the basic function of server
 #include "server.h"
 #include "surakarta/basic.h"
 #include "surakarta/game.h"
 #include "surakarta/agent/agent_random.h"
 #include <QEventLoop>
 #include <random>
-
+// Server constructor: Initializes the server and sets up listening on port 1233.
 Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(nullptr),
                                   totalTimer(new Timer(this)), resetTimer(new Timer(this)), timeOut(false),
                                   logger(std::make_shared<Logger>()) {
@@ -15,7 +16,7 @@ Server::Server(QObject *parent) : QTcpServer(parent), client1(nullptr), client2(
         qDebug() << "Server established!";
     }
 }
-
+// Called when a new connection is incoming.
 void Server::incomingConnection(qintptr socketDescriptor) {
     // Try to connect to 2 clients.
     if (!client1) {
@@ -29,6 +30,8 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         connect(client2, &QTcpSocket::disconnected, this, &Server::socketDisconnected2);
         qDebug() << "Client 2 connected.";
         qDebug() << "2 players ready, start the game now!\n";
+
+         // Connect timers and start them
         connect(totalTimer, &Timer::updateTime, this, &Server::updateTimeSlot1);
         connect(resetTimer, &Timer::updateTime, this, &Server::updateTimeSlot2);
         connect(resetTimer, &Timer::timeOut, this, &Server::upDateTimeOut);
@@ -38,7 +41,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
         startGame();
     }
 }
-
+// Starts the game setup and main game loop.
 void Server::startGame() {
     logger->addLog(QString::number(BOARD_SIZE));
     isClient1AI = isClient2AI = false;
@@ -59,6 +62,8 @@ void Server::startGame() {
     std::uniform_int_distribution<int> distribution(1, 2);
     currentPlayer = distribution(engine);
     currentPlayerColor = Player::BLACK;
+
+    // Notify clients of their sides.
     if (currentPlayer == 1) {
         client1->write("$SB;"); // Side: B
         client2->write("$SW;"); // Side: W
@@ -73,6 +78,7 @@ void Server::startGame() {
         currentClient = (currentPlayer == 1) ? client1 : client2;
         QTcpSocket *otherClient = (currentPlayer == 1) ? client2 : client1;
         if (currentPlayer == 1 && isClient1AI || currentPlayer == 2 && isClient2AI) {
+            //AI move
             auto move = agent->CalculateMove();
             logger->addLog(QString("%1;%2->%3;%4 (%5)")
                                    .arg(move.from.x).arg(move.from.y)
@@ -80,6 +86,7 @@ void Server::startGame() {
                                    .arg(currentPlayer));
             game->Move(move);
         } else {
+            // Human player move
             QEventLoop loop;
             connect(currentClient, &QTcpSocket::readyRead, &loop, &QEventLoop::quit);
             while (true) {
@@ -101,6 +108,8 @@ void Server::startGame() {
             }
         }
         clearBuffer(currentClient);
+
+          // Handle data from the other client if available.
         if (otherClient->bytesAvailable() > 0) {
             QByteArray data = otherClient->read(otherClient->bytesAvailable());
             getData(data, true);
@@ -122,7 +131,7 @@ void Server::startGame() {
         startGame();
     }
 }
-
+// Processes incoming data from clients.
 bool Server::getData(QByteArray &data, bool reversed) {
     bool hasMove = false;
     qDebug() << "Now is client" << currentPlayer;
@@ -159,7 +168,7 @@ bool Server::getData(QByteArray &data, bool reversed) {
     }
     return true;
 }
-
+// Updates time for client
 void Server::updateTimeSlot1(const QString &time) {
     QTime startTime = QTime::fromString(time);
     startTime = startTime.addSecs(1);
@@ -188,11 +197,14 @@ void Server::updateTimeSlot2(const QString &time) {
     client2->write(message);
 }
 
+// Handles time-out event
 void Server::upDateTimeOut() {
     if (resetTimer->getTime() > maxSecond) {
         QByteArray message1, message2;
         message1.append("$ET");
         message2.append("$EF");
+
+        // Notify clients of the end of the game due to time-out.
         if (currentClient == client1) {
             client1->write(message1);
             client2->write(message2);
@@ -202,6 +214,8 @@ void Server::upDateTimeOut() {
             client1->write(message2);
             game->gameInfo->winner = ReverseColor(currentPlayerColor);
         }
+
+        // Reset and stop the timers.
         totalTimer->reset();
         resetTimer->reset();
         totalTimer->stop();
@@ -219,6 +233,8 @@ void Server::upDateTimeOut() {
     }
 }
 
+
+// Handles move message data.
 std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data) {
     // When perform move, the info format is : M4;5;3;4
     QByteArray dataCopy = data;
@@ -232,9 +248,11 @@ std::pair<Position, Position> Server::moveMessageHandler(const QByteArray &data)
     return std::make_pair(Position(idx[0], idx[1]), Position(idx[2], idx[3]));
 }
 
+// Processes data packets from clients.
 InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
     switch (info[0]) {
         case 'A': {
+        // AI setting
             if (reversed ^ (currentClient == client1)) {
                 isClient1AI = (info[1] == '1');
             } else {
@@ -243,6 +261,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
         }
         case 'M': {
+         // Move command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -253,6 +272,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::MOVE;
         }
         case 'Q': {
+        // Query command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -275,6 +295,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
                 }
                 currentClient->write(data.toUtf8());
             } else {
+                // Valid move query
                 QByteArray dataCopy = info;
                 dataCopy.remove(0, 2);
                 QList<int> idx;
@@ -292,6 +313,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
         }
         case 'G': {
+         // Retry command
             if (reversed) {
                 return InfoType::DEFAULT;
             }
@@ -301,7 +323,7 @@ InfoType Server::dataHandler(const QByteArray &info, bool reversed) {
             return InfoType::DEFAULT;
     }
 }
-
+// Slot function to handle disconnection of client 1.
 void Server::socketDisconnected1() {
     if (client1) {
         qDebug() << "Game stopped because client 1 stopped";
@@ -309,13 +331,14 @@ void Server::socketDisconnected1() {
     socketDisconnected();
 }
 
+// Slot function to handle disconnection of client 2.
 void Server::socketDisconnected2() {
     if (client2) {
         qDebug() << "Game stopped because client 2 stopped";
     }
     socketDisconnected();
 }
-
+// Handles cleanup and state reset when any client disconnects
 void Server::socketDisconnected() {
     if (client1) {
         qDebug() << "Client 1 stopped.";
@@ -332,7 +355,7 @@ void Server::socketDisconnected() {
     totalTimer->reset();
     resetTimer->reset();
 }
-
+// Slot function to handle board updates. Send boardInfo to client
 void Server::onBoardUpdated(const QString &boardInfo) {
     qDebug() << "Board Updated!";
     qDebug() << boardInfo << "\n";

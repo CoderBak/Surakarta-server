@@ -6,7 +6,7 @@
 #include <QString>
 #include <QDateTime>
 #include "surakarta/basic.h"
-
+// The Timer class inherits from QThread and is used for timing operations in the game.
 class Timer : public QThread {
 Q_OBJECT
 
@@ -28,6 +28,7 @@ signals:
     void timeOut();
 
 protected:
+    // The main function of the thread which runs in a loop while the timer is running.// The main function of the thread which runs in a loop while the timer is running.
     void run() override {
         while (m_running) {
             QString timeString = startTime.toString("hh:mm:ss");

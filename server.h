@@ -1,4 +1,4 @@
-// In this file, we define the Server class.
+// This file defines the Server class, which manages network connections and game state for a Surakarta game.
 #ifndef SERVER_H
 #define SERVER_H
 
@@ -19,6 +19,7 @@ public:
     void startGame();
 
 signals:
+    // Signal emitted when the game board is updated.
     void boardUpdated(const QString &boardInfo);
 
 protected:

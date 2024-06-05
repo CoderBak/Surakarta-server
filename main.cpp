@@ -1,3 +1,4 @@
+//In this file, we have main function
 #include <QApplication>
 #include "server.h"
 #include "mainwindow.h"
